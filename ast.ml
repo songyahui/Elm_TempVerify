@@ -1,40 +1,18 @@
-type name = string (*name of the signal e.g., A B C*)
-type lable = string
+type event =  string 
+type mn = string
+type var = string 
+type includ = string 
 
+type es = Bot 
+        | Emp 
+        | Underline
+        | Event of event
+        | Not of event
+        | Cons of es * es
+        | Or of es * es
+        | Kleene of es
+        | Omega of es
 
-type signal = One of name | Zero of name 
-
-(*signal set*)
-type instance = signal list ;;
-
-
-type terms = Var of name
-           | Number of int
-           | Plus of terms * terms
-           | Minus of terms * terms
-
-(*
-
-type realtime = 
-           | Anytime 
-           | EqConst of int 
-           | Greater of int
-           | LessThan of int
-           | RTAnd of realtime * realtime
-           | RTOr  of realtime * realtime
-
-
-*)
-
-type es = Bot  (*_|_*)
-        | Emp  (* emp *)
-        | Wait of name 
-        | Instance of instance (*logical tick*) (* {} *)
-        | Cons of es * es (* .  *)
-        | Choice of es * es (* \/ *)
-        | Par of es * es (* ||  *)
-        | RealTime of es * terms (*real time tick*) (* es # t *)
-        | Kleene of es (* es^* *)
 
 (*Arithimetic pure formulae*)
 type pure = TRUE
