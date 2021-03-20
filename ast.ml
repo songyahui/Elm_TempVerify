@@ -37,33 +37,64 @@ type inclusion = effect * effect * bool;;
 
 type spec = PrePost of effect * effect
 
-type _type = INT | FLOAT | BOOL | VOID
+(*-| Representations for modules' exports.*)
+
+type exportSet = AllExport
+        | SubsetExport of ( exportSet list)
+        | FunctionExport of mn
+        | TypeExport of mn *( exportSet option)
 
 
-type expression = Unit 
-          | Return
-          | Integer of int
-          | Bool of bool
-          | Float of float
-          | String of string
-          | Variable of var
-          | LocalDel of _type * var * expression 
-          | Call of mn * expression list 
-          | Assign of var * expression
-          | Seq of expression * expression
-          | EventRaise of (event*int option)
-          | IfElse of expression * expression * expression
-          | Cond of expression * expression * string
-          | BinOp of expression * expression * string
-          | Assertion of effect
+(*-| Representations for Elm's type syntax.*)
+type _type = TypeConstructor of ( _type list)
+    | TypeVariable of mn
+    | TypeRecordConstructor of _type * ( ( mn* _type ) list)
+    | TypeRecord of ( ( mn*  _type ) list)
+    | TypeTuple of ( _type list)
+    | TypeApplication of _type * _type
 
-type param  = (_type * var) list
+type pattern = PWildcard
+    | PVariable of mn
+    | PConstructor of mn
+    | PLiteral of int
+    | PTuple of ( pattern list)
+    | PCons of pattern * pattern
+    | PList of ( pattern list)
+    | PRecord of (mn list)
+    | PA of pattern * mn
+    | PApplication of pattern * pattern
 
-type meth = Meth of _type * mn * param * spec * expression
 
-type declare = Include of string | Method of meth
+type expression = Number of int
+    | Variable of mn
+    | List of ( expression list)
+    | Tuple of ( expression list)
+    | Access of expression * ( mn list)
+    | AccessFunction of mn
+    | Record of ( ( mn * expression ) list)
+    | RecordUpdate of mn * ( ( mn * expression )list)
+    | If of expression * expression * expression
+    | Let of (  ( pattern* expression )list ) * expression
+    | Case of expression * ( ( pattern * expression ) list)
+    | Lambda of (pattern list) * expression
+    | Application of expression * expression
+    | BinOp of expression * expression * expression
 
-type program = declare list
+
+(* -| Representations for Elm's statements.*)
+type statement = ModuleDeclaration of mn * exportSet
+    | PortModuleDeclaration of mn * exportSet
+    | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
+    | ImportStatement of mn * (mn option) * ( exportSet option)
+    | TypeAliasDeclaration of _type * _type
+    | TypeDeclaration of _type * (_type list)
+    | PortTypeDeclaration of mn * _type
+    | PortDeclaration of mn * ( mn list)  * expression
+    | FunctionTypeDeclaration of mn * _type
+    | FunctionDeclaration of pattern * expression
+    | Comment of string
+
+type program = statement list 
 
 type prog_states = (pure * es ) list
 
