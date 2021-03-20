@@ -70,14 +70,14 @@ rule token = parse
 | '*' {KLEENE}
 
 | "<>" {FUTURE}  
-
 | "->" {IMPLY}
 | '!' {LTLNOT}
 
 | ':' { COLON }
 | "&&" {LILAND}
 | "||" {LILOR}
-
+| "--" { read_single_line_comment lexbuf }
+| "{-" { read_multi_line_comment lexbuf }
 
 | eof { EOF }
 
@@ -151,9 +151,20 @@ rule token = parse
 | _ { raise (SyntaxError ("Unexpected char: " ^ Lexing.lexeme lexbuf)) }
 
 
+and read_single_line_comment = parse
+  | newline { next_line lexbuf; token lexbuf }
+  | eof { EOF }
+  | _ { read_single_line_comment lexbuf }
+  
+and read_multi_line_comment = parse
+  | "-}" { token lexbuf }
+  | newline { next_line lexbuf; read_multi_line_comment lexbuf }
+  | eof { raise (SyntaxError ("Lexer - Unexpected EOF - please terminate your comment.")) }
+  | _ { read_multi_line_comment lexbuf }
+
+
 (* part 5 
-and read_string buf =
-  parse
+and read_string buf = parse
   | '"'       { STRING (Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
   | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
@@ -168,5 +179,4 @@ and read_string buf =
     }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
   | eof { raise (SyntaxError ("String is not terminated")) }
-
   *)

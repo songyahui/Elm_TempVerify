@@ -4,6 +4,9 @@
 --   https://guide.elm-lang.org/effects/random.html
 --
 
+init = 1
+
+{-
 import Browser
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -85,3 +88,4 @@ view model =
     [ h1 [] [ text (String.fromInt model.dieFace) ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
+-}

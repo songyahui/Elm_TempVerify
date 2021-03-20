@@ -37,6 +37,8 @@ type inclusion = effect * effect * bool;;
 
 type spec = PrePost of effect * effect
 
+
+(* Elm Syntax *)
 (*-| Representations for modules' exports.*)
 
 type exportSet = AllExport
@@ -53,10 +55,16 @@ type _type = TypeConstructor of ( _type list)
     | TypeTuple of ( _type list)
     | TypeApplication of _type * _type
 
+type literal = Character of char
+    | String of string
+    | Integer of int
+    | Float of float
+
+
 type pattern = PWildcard
     | PVariable of mn
     | PConstructor of mn
-    | PLiteral of int
+    | PLiteral of literal
     | PTuple of ( pattern list)
     | PCons of pattern * pattern
     | PList of ( pattern list)
@@ -65,7 +73,8 @@ type pattern = PWildcard
     | PApplication of pattern * pattern
 
 
-type expression = Number of int
+
+type expression = Literal of literal 
     | Variable of mn
     | List of ( expression list)
     | Tuple of ( expression list)
@@ -92,7 +101,6 @@ type statement = ModuleDeclaration of mn * exportSet
     | PortDeclaration of mn * ( mn list)  * expression
     | FunctionTypeDeclaration of mn * _type
     | FunctionDeclaration of pattern * expression
-    | Comment of string
 
 type program = statement list 
 

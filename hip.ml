@@ -1,8 +1,41 @@
 
 open Pretty
+open Ast
 
 
+let string_of_literal (l:literal) : string = 
+  match l with 
+  | Character c -> String.make 1 c 
+  | String str -> str
+  | Integer n -> string_of_int n 
+  | Float f -> string_of_float f
+  ;;
 
+let string_of_expression (expr:expression) : string = 
+  match expr with
+  | Literal l -> string_of_literal l 
+  | _ -> "later"
+  ;;
+
+let string_of_pattern (pat:pattern) : string = 
+  match pat with
+  | PWildcard -> "_"
+  | _ -> "later"
+  ;;
+
+let string_of_statement (state:statement) : string = 
+  match state with
+  | FunctionDeclaration (pat, expr) -> string_of_pattern pat ^ " = " ^ string_of_expression expr 
+  | _ -> "later"
+
+  ;;
+
+
+let rec string_of_program (states : statement list) : string =
+  match states with
+    [] -> ""
+  | x::xs -> string_of_statement x ^ "\n" ^ string_of_program xs 
+  ;;
 
 
 let () =
@@ -12,12 +45,11 @@ print_string (inputfile ^ "\n" ^ outputfile^"\n");*)
   let ic = open_in inputfile in
   try
       let lines =  (input_lines ic ) in
-      (*let line = List.fold_right (fun x acc -> acc ^ "\n" ^ x) (List.rev lines) "" in
-      let progs = Parser.full_prog Lexer.token (Lexing.from_string line) in
-      *)
-      print_string (List.hd lines);
+      let line = List.fold_right (fun x acc -> acc ^ "\n" ^ x) (List.rev lines) "" in
+      let progs = Parser.program Lexer.token (Lexing.from_string line) in
+      
 
-      (*print_string (string_of_full_prog progs^"\n");*)
+      print_string (string_of_program progs^"\n");
       (*print_string ( (forward_verification progs) ^"\n");*)
       
       flush stdout;                (* 现在写入默认设备 *)

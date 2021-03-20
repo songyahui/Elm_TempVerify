@@ -2,10 +2,10 @@
 %{ open List %}
 
 
-%token <string> VAR
+%token <string> VAR 
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
-%token  LPAR RPAR SIMI LBrackets  RBrackets
+%token  LPAR RPAR SIMI LBrackets  RBrackets 
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 (*  POWER
@@ -23,12 +23,33 @@ END IN RUN
 
 
 
-%start ee ltl_p
+%start ee ltl_p program
 %type <(Ast.inclusion) list > ee
 %type <(Ast.ltl) list > ltl_p
+%type <(Ast.statement) list> program
 
 
 %%
+
+program:
+| EOF {[]}
+| a = statement r = program { append [a] r }
+
+statement:
+| p = pattern EQ expr = expression {FunctionDeclaration (p, expr)}
+
+pattern:
+| UNDERLINE {PWildcard}
+| str = VAR { PVariable str }
+
+expression: 
+| l = literal {Literal l }
+
+
+literal: 
+| n = INTE {Integer n}
+
+
 
 
 ee: 
