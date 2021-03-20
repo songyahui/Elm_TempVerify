@@ -5,12 +5,12 @@
 %token <string> UVAR LVAR COP
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
-%token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA
+%token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX 
 (*  POWER
-%token THEN ELSE ABORT WHEN LBRACK RBRACK      
+%token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
 END IN RUN
 *)
@@ -77,8 +77,13 @@ maybeExport:
 
 statement:
 | p = pattern EQ expr = expression {FunctionDeclaration (p, expr)}
-| IMPORT str = UVAR alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
+| IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
 
+
+moduleName:
+| obj = separated_list (CONCAT, UVAR) {
+  List.fold_left (fun acc a -> acc ^"."^a) "" obj
+}
 
 
 pattern:
@@ -88,13 +93,24 @@ pattern:
 
 expression: 
 | l = literal {Literal l }
+| str = LVAR {Variable str}
+| LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
+| str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
 
+| ex1 = expression ex2 = expression {Application (ex1, ex2)}
+
+
+
+record_aux: 
+| str = LVAR EQ ex =expression {(str, ex)}
 
 literal: 
 | n = INTE {Integer n}
 
-
-
+loName: 
+| UNDERLINE {"_"}
+| str = LVAR {str}
+| str = UVAR {str}
 
 ee: 
 | EOF {[]}

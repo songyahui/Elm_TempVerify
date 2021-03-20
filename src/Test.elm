@@ -4,22 +4,8 @@
 --   https://guide.elm-lang.org/effects/random.html
 --
 
-init = 1
-
-import Browser
-
-import Browser
-import Html as F exposing (Html (..), text, pre) 
-import Http
-import Html.Events exposing (..)
-
-import Browser exposing (element)
-import Html exposing (..)
-import Html.Attributes exposing (autofocus, class, placeholder, value)
-import Html.Events exposing (onClick, onDoubleClick, onInput, onSubmit)
 
 
-{-
 import Browser
 import Html exposing (..)
 import Html.Events exposing (..)
@@ -27,10 +13,7 @@ import Random
 import Process
 import Task
 
-
-
 -- MAIN
-
 
 main =
   Browser.element
@@ -39,6 +22,11 @@ main =
     , subscriptions = subscriptions
     , view = view
     }
+
+
+
+{-
+
 
 
 

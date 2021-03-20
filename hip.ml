@@ -11,9 +11,13 @@ let string_of_literal (l:literal) : string =
   | Float f -> string_of_float f
   ;;
 
-let string_of_expression (expr:expression) : string = 
+let rec string_of_expression (expr:expression) : string = 
   match expr with
   | Literal l -> string_of_literal l 
+  | Variable str -> str
+  | Record tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
+  | Access (ex, mn_li) ->  string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
+  | Application (ex1, ex2) -> string_of_expression ex1 ^" \n " ^ string_of_expression ex2
   | _ -> "later"
   ;;
 

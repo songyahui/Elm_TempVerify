@@ -24,8 +24,8 @@ let float = digit* frac? exp?
 (* part 3 *)
 let white = [' ' '\t']+
 let newline = '\n' | '\r' | "\r\n" 
-let upper_id = ['A'-'Z'] ['a'-'z' '.' 'A'-'Z' '0'-'9' '_']*
-let lower_id = ['a'-'z' ] ['a'-'z' '.' 'A'-'Z' '0'-'9' '_']*
+let upper_id = ['A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let lower_id = ['a'-'z' ] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let op = ['[' '+' '\\' '-' '/' '*' '=' '.' '$' '<' '>' ':' '&''|''^''?''%''#''@''~''!'']''+''|']+
 
 
@@ -50,7 +50,8 @@ rule token = parse
 
 | '(' { LPAR }
 | ')' { RPAR }
-
+| '{' { LBRACK  }
+| '}' { RBRACK }
 | int      { INTE (int_of_string (Lexing.lexeme lexbuf)) }
 | '.' { CONCAT }
 
@@ -97,8 +98,7 @@ rule token = parse
 
 | '?' {QUESTION}
 | '#' { SHARP }
-| '{' { LBRACK  }
-| '}' { RBRACK }
+
 | ';' { SIMI }
 | "||" { PAR }
 | "require" {REQUIRE}
