@@ -24,7 +24,9 @@ let float = digit* frac? exp?
 (* part 3 *)
 let white = [' ' '\t']+
 let newline = '\n' | '\r' | "\r\n" 
-let id = ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
+let upper_id = ['A'-'Z'] ['a'-'z' '.' 'A'-'Z' '0'-'9' '_']*
+let lower_id = ['a'-'z' ] ['a'-'z' '.' 'A'-'Z' '0'-'9' '_']*
+let op = ['[' '+' '\\' '-' '/' '*' '=' '.' '$' '<' '>' ':' '&''|''^''?''%''#''@''~''!'']''+''|']+
 
 
 rule token = parse
@@ -54,7 +56,12 @@ rule token = parse
 
 | 'X' {NEXT}
 | 'U' {UNTIL}
-| id as str { VAR str }
+| "import" {IMPORT}
+| "exposing" {EXPOSING}
+| "as" {AS}
+| ".." {ALLEX}
+| upper_id as str { UVAR str }
+| lower_id as str { LVAR str }
 | "|-" {ENTIL}
 | "\\/" {DISJ}
 | '+' { PLUS }
@@ -72,13 +79,15 @@ rule token = parse
 | "<>" {FUTURE}  
 | "->" {IMPLY}
 | '!' {LTLNOT}
-
+| ',' { COMMA }
 | ':' { COLON }
 | "&&" {LILAND}
 | "||" {LILOR}
 | "--" { read_single_line_comment lexbuf }
 | "{-" { read_multi_line_comment lexbuf }
 
+
+| op as str {COP str}
 | eof { EOF }
 
 (*
@@ -113,7 +122,7 @@ rule token = parse
 | "emit" {EMIT}
 | "await" {AWAIT}
 | "async" {ASYNC}
-| ',' { COMMA }
+
 | "assert" {ASSERT}
 | '[' { LBrackets }
 | ']' { RBrackets }

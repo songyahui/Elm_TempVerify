@@ -2,12 +2,13 @@
 %{ open List %}
 
 
-%token <string> VAR 
+%token <string> UVAR LVAR COP
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
-%token  LPAR RPAR SIMI LBrackets  RBrackets 
+%token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
+%token IMPORT EXPOSING AS ALLEX 
 (*  POWER
 %token THEN ELSE ABORT WHEN LBRACK RBRACK      
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -17,7 +18,7 @@ END IN RUN
 
 (* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
 %token LSPEC RSPEC ENSURE REQUIRE MODULE OUT INOUT
-%token LBrackets RBrackets HIPHOP COMMA
+%token LBrackets RBrackets HIPHOP 
  *)
 %token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
 
@@ -35,12 +36,55 @@ program:
 | EOF {[]}
 | a = statement r = program { append [a] r }
 
+
+maybeNM:
+| {None}
+| AS str = UVAR {Some str}
+
+exportSet:
+| ALLEX {AllExport}
+| se =  subsetExport {se}
+
+typeExport: 
+| mn= UVAR m = constructorExports { TypeExport (mn, m)}
+
+
+constructorExports :
+| {None}
+|  LPAR  r = constructorExportsIn RPAR  {Some r}
+
+constructorExportsIn:
+| ALLEX {AllExport}
+
+functionExport : 
+| mn= LVAR { FunctionExport mn}
+| LPAR op = COP RPAR { FunctionExport op}
+
+subsetExport:
+| obj = separated_list (COMMA, subsetExportIn) {SubsetExport obj}
+
+
+subsetExportIn:
+| r = functionExport {r}
+| r = typeExport {r}
+
+
+
+maybeExport:
+| {None}
+| EXPOSING LPAR expSet = exportSet RPAR{Some expSet}
+
+
 statement:
 | p = pattern EQ expr = expression {FunctionDeclaration (p, expr)}
+| IMPORT str = UVAR alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
+
+
 
 pattern:
 | UNDERLINE {PWildcard}
-| str = VAR { PVariable str }
+| str = LVAR { PVariable str }
+| l = literal {PLiteral l}
 
 expression: 
 | l = literal {Literal l }
@@ -94,7 +138,7 @@ pure:
 *)
 
 term:
-| str = VAR { Var str }
+| str = UVAR { Var str }
 | n = INTE {Number n}
 | LPAR r = term RPAR { r }
 | a = term b = INTE {Minus (a, Number (0 -  b))}
@@ -106,8 +150,8 @@ term:
 
 es:
 | EMPTY { Emp }
-| var = VAR {(Event var)}
-| LTLNOT var = VAR {(Not var)}
+| var = UVAR {(Event var)}
+| LTLNOT var = UVAR {(Not var)}
   
 | LPAR r = es RPAR { r }
 | LPAR a = es DISJ b = es RPAR { ESOr(a, b) }
@@ -123,7 +167,7 @@ ltl_p:
 | a = ltl SIMI r = ltl_p { append [a] r }
 
 ltl : 
-| s = VAR {Lable s} 
+| s = UVAR {Lable s} 
 | LPAR r = ltl RPAR { r }
 | NEXT p = ltl  {Next p}
 | LPAR p1= ltl UNTIL p2= ltl RPAR {Until (p1, p2)}

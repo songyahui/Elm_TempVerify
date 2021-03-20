@@ -20,12 +20,36 @@ let string_of_expression (expr:expression) : string =
 let string_of_pattern (pat:pattern) : string = 
   match pat with
   | PWildcard -> "_"
-  | _ -> "later"
+  | PVariable mn -> mn
+  | PLiteral l ->   string_of_literal l
   ;;
+
+let rec string_of_exportSet (ex: exportSet): string = 
+  match ex with 
+  | AllExport -> ".."
+  | SubsetExport (ex_li) -> List.fold_left (fun acc a -> acc ^","^ string_of_exportSet a ) "" ex_li
+  | FunctionExport str -> str
+  | TypeExport (mn, exportSet_option) -> mn ^ (
+    match exportSet_option with 
+    | None -> ""
+    | Some s -> "(" ^ string_of_exportSet s ^ ")"
+  )
+  ;;
+
 
 let string_of_statement (state:statement) : string = 
   match state with
   | FunctionDeclaration (pat, expr) -> string_of_pattern pat ^ " = " ^ string_of_expression expr 
+  | ImportStatement (mn, mn_option, exportSet_option) ->  "import " ^ mn ^  (
+      match mn_option with 
+      | None -> ""
+      | Some str -> "as "^ str ^" ")  ^  (
+      match exportSet_option with
+      | None -> ""
+      | Some con -> "(" ^ string_of_exportSet con ^ ")"
+      )
+
+
   | _ -> "later"
 
   ;;

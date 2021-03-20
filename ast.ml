@@ -63,14 +63,16 @@ type literal = Character of char
 
 type pattern = PWildcard
     | PVariable of mn
-    | PConstructor of mn
     | PLiteral of literal
+    (*
+    | PConstructor of mn
     | PTuple of ( pattern list)
     | PCons of pattern * pattern
     | PList of ( pattern list)
     | PRecord of (mn list)
     | PA of pattern * mn
     | PApplication of pattern * pattern
+    *)
 
 
 
@@ -91,9 +93,7 @@ type expression = Literal of literal
 
 
 (* -| Representations for Elm's statements.*)
-type statement = ModuleDeclaration of mn * exportSet
-    | PortModuleDeclaration of mn * exportSet
-    | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
+type statement = 
     | ImportStatement of mn * (mn option) * ( exportSet option)
     | TypeAliasDeclaration of _type * _type
     | TypeDeclaration of _type * (_type list)
@@ -101,6 +101,11 @@ type statement = ModuleDeclaration of mn * exportSet
     | PortDeclaration of mn * ( mn list)  * expression
     | FunctionTypeDeclaration of mn * _type
     | FunctionDeclaration of pattern * expression
+    (*
+    ModuleDeclaration of mn * exportSet
+    | PortModuleDeclaration of mn * exportSet
+    | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
+    *)
 
 type program = statement list 
 
