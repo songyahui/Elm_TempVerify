@@ -1,3 +1,8 @@
+type terms = Var of string
+           | Number of int
+           | Plus of terms * terms
+           | Minus of terms * terms 
+
 type event =  string 
 type mn = string
 type var = string 
@@ -9,7 +14,7 @@ type es = Bot
         | Event of event
         | Not of event
         | Cons of es * es
-        | Or of es * es
+        | ESOr of es * es
         | Kleene of es
         | Omega of es
 
@@ -28,33 +33,39 @@ type pure = TRUE
 
 type effect = (pure * es) list 
 
-type inclusion = effect * effect;;
+type inclusion = effect * effect * bool;;
 
-type inclusion_sleek = effect * effect * bool;;    (*the bool is the expected result*) 
+type spec = PrePost of effect * effect
 
-type prog = Halt 
-          | Yield 
-          | Seq of prog * prog 
-          | Fork of prog * prog
-          | Loop of prog
-          | Declear of name * prog
-          | Emit of name
-          | Present of name * prog * prog
-          | Trap of lable * prog
-          | Break of lable
-          | Run of name
-          | Abort of int * prog
-(*Esterel SYNC*)
-          | Async of name * prog * int (*the delay*)  (*set a timeout*)
-          | Await of name 
-          | Assert of effect
-(*JS ASYNC*)
+type _type = INT | FLOAT | BOOL | VOID
 
-type prog_states = (pure * es * instance * name option) list
 
-type fst = (instance * string * pure)
+type expression = Unit 
+          | Return
+          | Integer of int
+          | Bool of bool
+          | Float of float
+          | String of string
+          | Variable of var
+          | LocalDel of _type * var * expression 
+          | Call of mn * expression list 
+          | Assign of var * expression
+          | Seq of expression * expression
+          | EventRaise of (event*int option)
+          | IfElse of expression * expression * expression
+          | Cond of expression * expression * string
+          | BinOp of expression * expression * string
+          | Assertion of effect
 
-type parfst = SL of instance | W of name
+type param  = (_type * var) list
+
+type meth = Meth of _type * mn * param * spec * expression
+
+type declare = Include of string | Method of meth
+
+type program = declare list
+
+type prog_states = (pure * es ) list
 
 type ltl = Lable of string 
         | Next of ltl
@@ -65,7 +76,3 @@ type ltl = Lable of string
         | Imply of ltl * ltl
         | AndLTL of ltl * ltl
         | OrLTL of ltl * ltl
-
-
-type spec_prog = name * string list * string list * effect * effect * prog
-              (* name , input,     output, precon, postcon, body*)

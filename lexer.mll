@@ -30,36 +30,12 @@ let id = ['a'-'z' 'A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 rule token = parse
 | white    { token lexbuf }
 | newline  { next_line lexbuf; token lexbuf }
-| "halt" { NOTHING }
-| "yield" {PAUSE}  
-| "loop" {LOOP}
-| "signal" {SIGNAL}
-| "emit" {EMIT}
-| "await" {AWAIT}
-| "async" {ASYNC}
-| "assert" {ASSERT}
-| "when" {WHEN}
-| "present" {PRESENT}
-| "run" {RUN}
-| "trap" {TRAP}
-| "exit" {EXIT}
-| "emp" { EMPTY }
-| "require" {REQUIRE}
-| "ensure" {ENSURE}
-| "module" {MODULE}
-| "hiphop" {HIPHOP}
-| "inout" {INOUT}
-| "out" {OUT}
-| "end" {END}
-| "in" {IN}
-| "then" {THEN}
-| "else" {ELSE}
+
 | "TRUE" { TRUEToken }
 | "FALSE" { FALSEToken }
 | "true" { TRUEE (bool_of_string (Lexing.lexeme lexbuf))}
 | "false" { FALSEE (bool_of_string (Lexing.lexeme lexbuf))}
-| "count" { COUNT }
-| "abort" {ABORT} 
+
 | ">=" {GTEQ}
 | "<=" {LTEQ}
 | '>' {GT}
@@ -72,12 +48,10 @@ rule token = parse
 
 | '(' { LPAR }
 | ')' { RPAR }
-| '{' { LBRACK  }
-| '}' { RBRACK }
-| ';' { SIMI }
+
 | int      { INTE (int_of_string (Lexing.lexeme lexbuf)) }
 | '.' { CONCAT }
-| "||" { PAR }
+
 | 'X' {NEXT}
 | 'U' {UNTIL}
 | id as str { VAR str }
@@ -90,6 +64,8 @@ rule token = parse
 | ']' { RBrackets }
 | '#' { SHARP }
 | ',' { COMMA }
+| 'w' {OMEGA}
+| '_' {UNDERLINE}
 
 | '^' { POWER }
 | '*' {KLEENE}
@@ -109,12 +85,40 @@ rule token = parse
 
 (*
 
-
-| 'w' {OMEGA}
+| '{' { LBRACK  }
+| '}' { RBRACK }
+| ';' { SIMI }
+| "||" { PAR }
+| "require" {REQUIRE}
+| "ensure" {ENSURE}
+| "module" {MODULE}
+| "hiphop" {HIPHOP}
+| "inout" {INOUT}
+| "out" {OUT}
+| "end" {END}
+| "in" {IN}
+| "then" {THEN}
+| "when" {WHEN}
 | "if" {IF}
 | "else" {ELSE}
+| "count" { COUNT }
+| "abort" {ABORT} 
+| "halt" { NOTHING }
+| "yield" {PAUSE}  
+| "loop" {LOOP}
+| "signal" {SIGNAL}
+| "emit" {EMIT}
+| "await" {AWAIT}
+| "async" {ASYNC}
+| "assert" {ASSERT}
 
+| "present" {PRESENT}
+| "run" {RUN}
+| "trap" {TRAP}
+| "exit" {EXIT}
+| "emp" { EMPTY }
 
+| "else" {ELSE}
 | "[]" {GLOBAL}
 | "include" {INCLUDE}
 | '"'      { read_string (Buffer.create 17) lexbuf }
