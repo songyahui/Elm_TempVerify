@@ -5,18 +5,23 @@
 %token <string> VAR
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
-%token NOTHING PAUSE PAR  LOOP SIGNAL LPAR RPAR EMIT PRESENT TRAP EXIT SIMI
-%token AWAIT ASYNC ASSERT COLON COUNT QUESTION SHARP MINUS PLUS POWER TRUEToken FALSEToken NEGATION
-%token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ COMMA CONCAT UNDERLINE KLEENE OMEGA END IN RUN
-(* LBrackets  RBrackets POWER
+%token  LPAR RPAR SIMI LBrackets  RBrackets
+%token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
+%token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
+(*  POWER
 %token THEN ELSE ABORT WHEN LBRACK RBRACK      
-
+AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
+END IN RUN
 *)
-%left CONCAT DISJ 
-(* %right SIMI PAR *)
-%token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
+%left CONCAT  DISJ 
+
+(* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
 %token LSPEC RSPEC ENSURE REQUIRE MODULE OUT INOUT
-%token LBrackets RBrackets HIPHOP 
+%token LBrackets RBrackets HIPHOP COMMA
+ *)
+%token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
+
+
 
 %start ee ltl_p
 %type <(Ast.inclusion) list > ee
@@ -49,16 +54,23 @@ effect:
 pure:
 | TRUEToken {TRUE}
 | FALSEToken {FALSE}
-| NEGATION LPAR a = pure RPAR {Neg a}
-| LPAR r = pure RPAR { r }
 | a = term GT b = term {Gt (a, b)}
 | a = term LT b = term {Lt (a, b)}
 | a = term GTEQ b = term {GtEq (a, b)}
 | a = term LTEQ b = term {LtEq (a, b)}
 | a = term EQ b = term {Eq (a, b)}
-| a = pure CONJ b = pure {PureAnd (a, b)}
-| a = pure DISJ b = pure {PureOr (a, b)}
 
+| NEGATION  a = pure {Neg a}
+| LBrackets r = pure RBrackets { r }
+| LBrackets a = pure CONJ b = pure RBrackets {PureAnd (a, b)}
+| LBrackets a = pure DISJ b = pure RBrackets {PureOr (a, b)}
+
+
+
+(*
+
+
+*)
 
 term:
 | str = VAR { Var str }
@@ -77,11 +89,11 @@ es:
 | LTLNOT var = VAR {(Not var)}
   
 | LPAR r = es RPAR { r }
-| a = es DISJ b = es { ESOr(a, b) }
-| LPAR r = es POWER OMEGA RPAR{ Omega r }
+| LPAR a = es DISJ b = es RPAR { ESOr(a, b) }
+| LPAR r = es RPAR POWER OMEGA { Omega r }
 | UNDERLINE {Underline}
 | a = es CONCAT b = es { Cons(a, b) } 
-| LPAR a = es POWER KLEENE RPAR{Kleene a}
+| LPAR a = es RPAR POWER KLEENE  {Kleene a}
 
 
 

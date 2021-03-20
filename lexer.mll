@@ -60,10 +60,9 @@ rule token = parse
 | '+' { PLUS }
 | '-' { MINUS }
 | '~' {NEGATION}
-| '[' { LBrackets }
-| ']' { RBrackets }
-| '#' { SHARP }
-| ',' { COMMA }
+
+
+
 | 'w' {OMEGA}
 | '_' {UNDERLINE}
 
@@ -74,17 +73,21 @@ rule token = parse
 
 | "->" {IMPLY}
 | '!' {LTLNOT}
-| '?' {QUESTION}
+
 | ':' { COLON }
 | "&&" {LILAND}
 | "||" {LILOR}
 
-| "/*@" {LSPEC}
-| "@*/" {RSPEC}
+
 | eof { EOF }
 
 (*
 
+| "/*@" {LSPEC}
+| "@*/" {RSPEC}
+
+| '?' {QUESTION}
+| '#' { SHARP }
 | '{' { LBRACK  }
 | '}' { RBRACK }
 | ';' { SIMI }
@@ -110,8 +113,10 @@ rule token = parse
 | "emit" {EMIT}
 | "await" {AWAIT}
 | "async" {ASYNC}
+| ',' { COMMA }
 | "assert" {ASSERT}
-
+| '[' { LBrackets }
+| ']' { RBrackets }
 | "present" {PRESENT}
 | "run" {RUN}
 | "trap" {TRAP}
