@@ -33,6 +33,7 @@ type alias Model =
   }
 
 
+init : Model -> Model
 {-
 
 init : () -> (Model, Cmd Msg)

@@ -18,6 +18,7 @@ let rec string_of_type (t:_type): string =
     List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t_li
   | TypeVariable v -> v
   | TypeRecord tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_type b ) "" tuple_li ^ "}"
+  | TypeApplication (t1, t2) -> string_of_type t1 ^" -> " ^ string_of_type t2
   | _ -> "later"
   ;;
 
@@ -63,6 +64,7 @@ let string_of_statement (state:statement) : string =
       | Some con -> "(" ^ string_of_exportSet con ^ ")"
       )
   | TypeAliasDeclaration (t1, t2) -> string_of_type t1 ^" = " ^ string_of_type t2
+  | FunctionTypeDeclaration (mn, t) -> mn ^ " : " ^ string_of_type t
   | _ -> "later"
 
   ;;

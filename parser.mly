@@ -86,12 +86,16 @@ statement:
 | IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
 | MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
 | TYPE ALIAS t1= _type EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
-
+| mn = LVAR COLON t = typeAnnotation {FunctionTypeDeclaration (mn, t)}
 
 
 _type:
 | mn = LVAR {TypeVariable mn}
 | mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
+| LPAR t =typeAnnotation RPAR {t}
+
+typeAnnotation:
+| t = _type IMPLY ta = _type {TypeApplication (t, ta)}
 
 
 typeParameterAUX:
@@ -141,25 +145,6 @@ expr_term:
 record_aux: 
 | newlines str = LVAR EQ ex =expression newlines {(str, ex)}
 
-
-(*
-expression: 
-
-
-| ex = ex_aux {ex}
-| ex1 = ex_aux newline_none ex2 = ex_aux {Application (ex1, ex2)}
-
-
-
-ex_aux:
-
-
-
-
-
-
-
-*)
 
 literal: 
 | n = INTE {Integer n}
