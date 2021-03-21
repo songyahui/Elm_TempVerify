@@ -64,10 +64,10 @@ rule token = parse
 | "import" {IMPORT}
 | "exposing" {EXPOSING}
 
-(*
+
 | "type" {TYPE}
 | "alias" {ALIAS}
-*)
+
 
 | "as" {AS}
 | "module" {MODULE}

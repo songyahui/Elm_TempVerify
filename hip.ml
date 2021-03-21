@@ -11,6 +11,16 @@ let string_of_literal (l:literal) : string =
   | Float f -> string_of_float f
   ;;
 
+let rec string_of_type (t:_type): string = 
+  match t with 
+  | TypeConstructor (mn_li, t_li) -> 
+    List.fold_left (fun acc a -> acc ^"." ^ a) ""  mn_li ^ 
+    List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t_li
+  | TypeVariable v -> v
+  | TypeRecord tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_type b ) "" tuple_li ^ "}"
+  | _ -> "later"
+  ;;
+
 let rec string_of_expression (expr:expression) : string = 
   match expr with
   | Literal l -> string_of_literal l 
@@ -52,8 +62,7 @@ let string_of_statement (state:statement) : string =
       | None -> ""
       | Some con -> "(" ^ string_of_exportSet con ^ ")"
       )
-
-
+  | TypeAliasDeclaration (t1, t2) -> string_of_type t1 ^" = " ^ string_of_type t2
   | _ -> "later"
 
   ;;

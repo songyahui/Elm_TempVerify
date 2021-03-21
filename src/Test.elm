@@ -16,22 +16,12 @@ import Task
 -- MAIN
 
 main =
-    Browser.element
+  Browser.element
     { init = init
     , update = update
     , subscriptions = subscriptions
     , view = view
-    } mm
-    
-
-
-
-
-
-
-{-
-
-
+    }
 
 
 -- MODEL
@@ -42,6 +32,8 @@ type alias Model =
   { dieFace : Int
   }
 
+
+{-
 
 init : () -> (Model, Cmd Msg)
 init _ =

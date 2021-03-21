@@ -21,9 +21,9 @@ END IN RUN
 %token LBrackets RBrackets HIPHOP 
  *)
 %token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
-(* 
+
 %token TYPE ALIAS 
-*)
+
 
 
 %start ee ltl_p program
@@ -37,10 +37,6 @@ END IN RUN
 newlines:
 | {()}
 | NEWLINE newlines {()}
-
-newline_none:
-| {()}
-| NEWLINE {()}
 
 program:
 | newlines EOF {[]}
@@ -88,10 +84,10 @@ maybeExport:
 statement:
 | p = pattern EQ newlines expr = expression {FunctionDeclaration (p, expr)}
 | IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
-
-(*
 | MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
-| TYPE ALIAS t1= _type EQ t2 = _type {TypeAliasDeclaration (t1, t2)}
+| TYPE ALIAS t1= _type EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
+
+
 
 _type:
 | mn = LVAR {TypeVariable mn}
@@ -102,10 +98,15 @@ typeParameterAUX:
 | {[]}
 | x= typeParameter xs = typeParameterAUX {x :: xs }
 
+t_record_aux: 
+| newlines str = LVAR COLON ex = _type newlines {(str, ex)}
+
+
 typeParameter:
 | mn = LVAR {TypeVariable mn}
+| LBRACK obj = separated_list (COMMA, t_record_aux)  RBRACK  {TypeRecord obj}
 
-*)
+
 
 moduleName:
 | obj = separated_list (CONCAT, UVAR) {
@@ -120,7 +121,7 @@ pattern:
 
 
 expression: 
-| t = expr_term newline_none m = maybeExpr {
+| t = expr_term newlines m = maybeExpr {
   match m with
   | None -> t
   | Some t2 -> Application (t, t2)
@@ -134,7 +135,7 @@ expr_term:
 | l = literal {Literal l }
 | str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
 | str = loName {Variable str}
-| LBRACK newlines obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
+| LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
 
 
 record_aux: 
