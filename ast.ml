@@ -48,7 +48,8 @@ type exportSet = AllExport
 
 
 (*-| Representations for Elm's type syntax.*)
-type _type = TypeConstructor of ( _type list)
+type _type = 
+    | TypeConstructor of (mn list) * ( _type list)
     | TypeVariable of mn
     | TypeRecordConstructor of _type * ( ( mn* _type ) list)
     | TypeRecord of ( ( mn*  _type ) list)
@@ -94,6 +95,7 @@ type expression = Literal of literal
 
 (* -| Representations for Elm's statements.*)
 type statement = 
+    | ModuleDeclaration of mn * exportSet
     | ImportStatement of mn * (mn option) * ( exportSet option)
     | TypeAliasDeclaration of _type * _type
     | TypeDeclaration of _type * (_type list)
@@ -102,7 +104,6 @@ type statement =
     | FunctionTypeDeclaration of mn * _type
     | FunctionDeclaration of pattern * expression
     (*
-    ModuleDeclaration of mn * exportSet
     | PortModuleDeclaration of mn * exportSet
     | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
     *)

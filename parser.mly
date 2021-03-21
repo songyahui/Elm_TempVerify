@@ -1,14 +1,14 @@
 %{ open Ast %}
 %{ open List %}
 
-
+%token NEWLINE
 %token <string> UVAR LVAR COP
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
 %token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
-%token IMPORT EXPOSING AS ALLEX 
+%token IMPORT EXPOSING AS ALLEX MODULE
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -17,11 +17,13 @@ END IN RUN
 %left CONCAT  DISJ 
 
 (* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
-%token LSPEC RSPEC ENSURE REQUIRE MODULE OUT INOUT
+%token LSPEC RSPEC ENSURE REQUIRE  OUT INOUT
 %token LBrackets RBrackets HIPHOP 
  *)
 %token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
-
+(* 
+%token TYPE ALIAS 
+*)
 
 
 %start ee ltl_p program
@@ -32,9 +34,17 @@ END IN RUN
 
 %%
 
+newlines:
+| {()}
+| NEWLINE newlines {()}
+
+newline_none:
+| {()}
+| NEWLINE {()}
+
 program:
-| EOF {[]}
-| a = statement r = program { append [a] r }
+| newlines EOF {[]}
+| newlines a = statement r = program { append [a] r }
 
 
 maybeNM:
@@ -76,9 +86,26 @@ maybeExport:
 
 
 statement:
-| p = pattern EQ expr = expression {FunctionDeclaration (p, expr)}
+| p = pattern EQ newlines expr = expression {FunctionDeclaration (p, expr)}
 | IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
 
+(*
+| MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
+| TYPE ALIAS t1= _type EQ t2 = _type {TypeAliasDeclaration (t1, t2)}
+
+_type:
+| mn = LVAR {TypeVariable mn}
+| mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
+
+
+typeParameterAUX:
+| {[]}
+| x= typeParameter xs = typeParameterAUX {x :: xs }
+
+typeParameter:
+| mn = LVAR {TypeVariable mn}
+
+*)
 
 moduleName:
 | obj = separated_list (CONCAT, UVAR) {
@@ -91,18 +118,47 @@ pattern:
 | str = LVAR { PVariable str }
 | l = literal {PLiteral l}
 
+
 expression: 
+| t = expr_term newline_none m = maybeExpr {
+  match m with
+  | None -> t
+  | Some t2 -> Application (t, t2)
+}
+
+maybeExpr:
+| {None}
+| t = expression {Some t}
+
+expr_term:
 | l = literal {Literal l }
-| str = LVAR {Variable str}
-| LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
 | str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
-
-| ex1 = expression ex2 = expression {Application (ex1, ex2)}
-
+| str = loName {Variable str}
+| LBRACK newlines obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
 
 
 record_aux: 
-| str = LVAR EQ ex =expression {(str, ex)}
+| newlines str = LVAR EQ ex =expression newlines {(str, ex)}
+
+
+(*
+expression: 
+
+
+| ex = ex_aux {ex}
+| ex1 = ex_aux newline_none ex2 = ex_aux {Application (ex1, ex2)}
+
+
+
+ex_aux:
+
+
+
+
+
+
+
+*)
 
 literal: 
 | n = INTE {Integer n}

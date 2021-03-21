@@ -31,7 +31,11 @@ let op = ['[' '+' '\\' '-' '/' '*' '=' '.' '$' '<' '>' ':' '&''|''^''?''%''#''@'
 
 rule token = parse
 | white    { token lexbuf }
-| newline  { next_line lexbuf; token lexbuf }
+| newline  { NEWLINE 
+(*
+(next_line lexbuf; token lexbuf) 
+*)
+}
 
 | "TRUE" { TRUEToken }
 | "FALSE" { FALSEToken }
@@ -59,7 +63,14 @@ rule token = parse
 | 'U' {UNTIL}
 | "import" {IMPORT}
 | "exposing" {EXPOSING}
+
+(*
+| "type" {TYPE}
+| "alias" {ALIAS}
+*)
+
 | "as" {AS}
+| "module" {MODULE}
 | ".." {ALLEX}
 | upper_id as str { UVAR str }
 | lower_id as str { LVAR str }
@@ -103,7 +114,7 @@ rule token = parse
 | "||" { PAR }
 | "require" {REQUIRE}
 | "ensure" {ENSURE}
-| "module" {MODULE}
+
 | "hiphop" {HIPHOP}
 | "inout" {INOUT}
 | "out" {OUT}
