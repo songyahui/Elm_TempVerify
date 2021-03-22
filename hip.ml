@@ -19,6 +19,7 @@ let rec string_of_type (t:_type): string =
   | TypeVariable v -> v
   | TypeRecord tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_type b ) "" tuple_li ^ "}"
   | TypeApplication (t1, t2) -> string_of_type t1 ^" -> " ^ string_of_type t2
+  | TypeTuple t_li -> "(" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_type a) "" t_li ^")"
   | _ -> "later"
   ;;
 

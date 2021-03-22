@@ -33,10 +33,10 @@ type alias Model =
   }
 
 
-init : Model -> Model
+init : () -> (Model, Cmd Msg)
 {-
 
-init : () -> (Model, Cmd Msg)
+
 init _ =
   ( Model 1
   , Cmd.none

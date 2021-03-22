@@ -92,7 +92,13 @@ statement:
 _type:
 | mn = LVAR {TypeVariable mn}
 | mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
-| LPAR t =typeAnnotation RPAR {t}
+| t =typeAnnotation {t}
+
+| obj = typeTuple  {TypeTuple obj}
+
+typeTuple:
+| LPAR RPAR {[]}
+| LPAR obj = separated_list (COMMA, _type) RPAR {obj}
 
 typeAnnotation:
 | t = _type IMPLY ta = _type {TypeApplication (t, ta)}
@@ -107,7 +113,7 @@ t_record_aux:
 
 
 typeParameter:
-| mn = LVAR {TypeVariable mn}
+| mn = loName {TypeVariable mn}
 | LBRACK obj = separated_list (COMMA, t_record_aux)  RBRACK  {TypeRecord obj}
 
 
