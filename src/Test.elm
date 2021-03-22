@@ -33,14 +33,13 @@ type alias Model =
   }
 
 
-init : () -> (Model, Cmd Msg)
-init _ =
-  ( Model 1
-  , Cmd.none
-  )
+type Msg
+  = Roll
+  | NewFace Int
+
+
+  
 {-
-
-
 
 
 
@@ -48,9 +47,6 @@ init _ =
 -- UPDATE
 
 
-type Msg
-  = Roll
-  | NewFace Int
 
 
 update : Msg -> Model -> (Model, Cmd Msg)

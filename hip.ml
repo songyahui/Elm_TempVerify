@@ -68,6 +68,7 @@ let string_of_statement (state:statement) : string =
       | Some con -> "(" ^ string_of_exportSet con ^ ")"
       )
   | TypeAliasDeclaration (t1, t2) -> string_of_type t1 ^" = " ^ string_of_type t2
+  | TypeDeclaration (t1, t2_li) -> string_of_type t1 ^" = " ^ List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t2_li
   | FunctionTypeDeclaration (mn, t) -> mn ^ " : " ^ string_of_type t
   | _ -> "later"
 

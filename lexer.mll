@@ -48,7 +48,7 @@ rule token = parse
 | '<' {LT}
 | '=' {EQ}
 | "/\\" {CONJ}
-
+| '|' { CHOICE }
 | ">=" {GTEQ}
 | "<=" {LTEQ}
 
@@ -149,7 +149,7 @@ rule token = parse
 | '"'      { read_string (Buffer.create 17) lexbuf }
 
 
-| '|' { CHOICE }
+
 
 | '"' { read_string (Buffer.create 17) lexbuf }
 

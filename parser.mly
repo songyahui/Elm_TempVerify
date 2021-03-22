@@ -8,13 +8,14 @@
 %token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
-%token IMPORT EXPOSING AS ALLEX MODULE
+%token IMPORT EXPOSING AS ALLEX MODULE CHOICE
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
 END IN RUN
 *)
-%left CONCAT  DISJ 
+%left  CHOICE DISJ 
+%left  CONCAT
 
 (* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
 %token LSPEC RSPEC ENSURE REQUIRE  OUT INOUT
@@ -85,16 +86,31 @@ statement:
 | p = pattern EQ newlines expr = expression {FunctionDeclaration (p, expr)}
 | IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
 | MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
-| TYPE ALIAS t1= _type EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
+| TYPE ALIAS t1= _type newlines EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
 | mn = LVAR COLON t = typeAnnotation {FunctionTypeDeclaration (mn, t)}
+
+| TYPE t = _type newlines EQ newlines obj = separated_list (CHOICE, typeDeclaration ) {TypeDeclaration(t, obj)}
+
+typeDeclaration:
+| t = typeConstructor newlines {t}
 
 
 _type:
 | mn = LVAR {TypeVariable mn}
-| mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
-| t =typeAnnotation {t}
-
+| t = typeConstructor {t}
+| t = typeAnnotation {t}
 | obj = typeTuple  {TypeTuple obj}
+| t = t_record {t}
+
+typeConstructor:
+| mn_li = UVAR obj = typeParameterAUX {TypeConstructor ([mn_li], obj ) }
+
+(*
+| mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
+
+*)
+
+
 
 typeTuple:
 | LPAR RPAR {[]}
@@ -111,10 +127,13 @@ typeParameterAUX:
 t_record_aux: 
 | newlines str = LVAR COLON ex = _type newlines {(str, ex)}
 
+t_record:
+| LBRACK obj = separated_list (COMMA, t_record_aux)  RBRACK  {TypeRecord obj}
+
 
 typeParameter:
 | mn = loName {TypeVariable mn}
-| LBRACK obj = separated_list (COMMA, t_record_aux)  RBRACK  {TypeRecord obj}
+| t = t_record {t}
 
 
 
