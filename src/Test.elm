@@ -37,47 +37,15 @@ type Msg
   = Roll
   | NewFace Int
 
+
+
 -- UPDATE
 
 
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =  
-    case msg of
-    Roll ->
-      ( model
-      , Process.sleep 1000
-        |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
-      )
-    
-
-    NewFace newFace ->
-      ( Model newFace
-      , Cmd.none
-      )
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-  Sub.none
-
-
-
--- VIEW
-
-
-view : Model -> Html Msg
-  
-{-
-
-
-
-
-
-
+update msg model =
   case msg of
     Roll ->
       ( model
@@ -92,10 +60,29 @@ view : Model -> Html Msg
 
 
 
+-- SUBSCRIPTIONS
 
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
+
+
+
+view : Model -> Html Msg
 view model =
   div []
     [ h1 [] [ text (String.fromInt model.dieFace) ]
     , button [ onClick Roll ] [ text "Roll" ]
     ]
+  
+{-
+
+
+
+
+-- VIEW
+
+
+
 -}

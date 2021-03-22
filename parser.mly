@@ -2,14 +2,14 @@
 %{ open List %}
 
 %token NEWLINE
-%token <string> UVAR LVAR COP
+%token <string> UVAR LVAR COP STRING
 %token <int> INTE
 %token <bool> TRUEE FALSEE 
 %token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF LAMDA THEN_
+%token CASE OF LAMDA THEN_ 
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -20,7 +20,7 @@ END IN RUN
 
 (* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
 %token LSPEC RSPEC ENSURE REQUIRE  OUT INOUT
-%token LBrackets RBrackets HIPHOP 
+%token  HIPHOP 
  *)
 %token FUTURE GLOBAL IMPLY LTLNOT NEXT UNTIL LILAND LILOR 
 
@@ -205,6 +205,8 @@ expr_term:
 | str = loName {Variable str}
 | LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
+| LBrackets obj = separated_list (COMMA, expression) RBrackets {List obj}
+
 
 
 record_aux: 
@@ -213,6 +215,7 @@ record_aux:
 
 literal: 
 | n = INTE {Integer n}
+| str = STRING {String str}
 
 loName: 
 | UNDERLINE {"_"}

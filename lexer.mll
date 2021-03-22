@@ -26,7 +26,7 @@ let white = [' ' '\t']+
 let newline = '\n' | '\r' | "\r\n" 
 let upper_id = ['A'-'Z'] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
 let lower_id = ['a'-'z' ] ['a'-'z' 'A'-'Z' '0'-'9' '_']*
-let op = ['[' '+' '\\' '-' '/' '*' '=' '.' '$' '<' '>' ':' '&''|''^''?''%''#''@''~''!'']''+''|']+
+let op = ['+' '\\' '-' '/' '*' '=' '.' '$' '<' '>' ':' '&''|''^''?''%''#''@''~''!''+''|']+
 
 
 rule token = parse
@@ -56,6 +56,8 @@ rule token = parse
 | ')' { RPAR }
 | '{' { LBRACK  }
 | '}' { RBRACK }
+| '[' { LBrackets }
+| ']' { RBrackets }
 | '\\' {LAMDA}
 | "|>" {THEN_}
 | int      { INTE (int_of_string (Lexing.lexeme lexbuf)) }
@@ -100,6 +102,7 @@ rule token = parse
 | "||" {LILOR}
 | "--" { read_single_line_comment lexbuf }
 | "{-" { read_multi_line_comment lexbuf }
+| '"'      { read_string (Buffer.create 17) lexbuf }
 
 
 | op as str {COP str}
@@ -138,8 +141,7 @@ rule token = parse
 | "async" {ASYNC}
 
 | "assert" {ASSERT}
-| '[' { LBrackets }
-| ']' { RBrackets }
+
 | "present" {PRESENT}
 | "run" {RUN}
 | "trap" {TRAP}
@@ -149,7 +151,6 @@ rule token = parse
 | "else" {ELSE}
 | "[]" {GLOBAL}
 | "include" {INCLUDE}
-| '"'      { read_string (Buffer.create 17) lexbuf }
 
 
 
@@ -186,7 +187,7 @@ and read_multi_line_comment = parse
   | _ { read_multi_line_comment lexbuf }
 
 
-(* part 5 
+(* part 5   *)
 and read_string buf = parse
   | '"'       { STRING (Buffer.contents buf) }
   | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
@@ -202,4 +203,4 @@ and read_string buf = parse
     }
   | _ { raise (SyntaxError ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
   | eof { raise (SyntaxError ("String is not terminated")) }
-  *)
+
