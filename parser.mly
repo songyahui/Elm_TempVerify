@@ -9,12 +9,13 @@
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
+%token CASE OF
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
 END IN RUN
 *)
-%left  CHOICE DISJ 
+%left  DISJ 
 %left  CONCAT
 
 (* %right SIMI PAR NOTHING PAUSE PAR  LOOP SIGNAL EMIT PRESENT TRAP EXIT 
@@ -34,6 +35,10 @@ END IN RUN
 
 
 %%
+
+newline_none:
+| {()}
+| NEWLINE {()}
 
 newlines:
 | {()}
@@ -145,17 +150,35 @@ moduleName:
 
 pattern:
 | UNDERLINE {PWildcard}
-| str = LVAR { PVariable str }
+| str = loName { PVariable str }
 | l = literal {PLiteral l}
 | p1= pattern p2 = pattern {PApplication (p1, p2)}
 
 
+up_pattern:
+| UNDERLINE {PWildcard}
+| str = UVAR { PVariable str }
+| l = literal {PLiteral l}
+| p1= up_pattern p2 = pattern {PApplication (p1, p2)}
+
+
+
+
 expression: 
-| t = expr_term newlines m = maybeExpr {
+| t = expr_term newline_none m = maybeExpr {
   match m with
   | None -> t
   | Some t2 -> Application (t, t2)
 }
+| CASE ex1 = expr_term OF newlines 
+p = up_pattern IMPLY newlines ex = expression newline_none newlines 
+obj = bindings {Case (ex1, (p, ex) ::obj) }
+
+
+bindings:
+| {[]}
+|  p = up_pattern IMPLY newlines ex = expression newline_none newlines  b = bindings {(p, ex):: b}
+
 
 maybeExpr:
 | {None}

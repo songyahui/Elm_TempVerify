@@ -37,33 +37,23 @@ type Msg
   = Roll
   | NewFace Int
 
-
-  
-{-
-
-
-
-
 -- UPDATE
 
 
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
-update msg model =
-  case msg of
-    Roll ->
-      ( model
-      , Process.sleep 1000
-        |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
-      )
+update msg model =  
+    case msg of
+    Roll -> ( model)
+   --   , Process.sleep 1000
+    --    |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
+   --   )
 
     NewFace newFace ->
       ( Model newFace
       , Cmd.none
       )
-
-
 
 -- SUBSCRIPTIONS
 
@@ -78,6 +68,29 @@ subscriptions model =
 
 
 view : Model -> Html Msg
+  
+{-
+
+
+
+
+
+
+  case msg of
+    Roll ->
+      ( model
+      , Process.sleep 1000
+        |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
+      )
+
+    NewFace newFace ->
+      ( Model newFace
+      , Cmd.none
+      )
+
+
+
+
 view model =
   div []
     [ h1 [] [ text (String.fromInt model.dieFace) ]

@@ -63,7 +63,8 @@ rule token = parse
 | 'U' {UNTIL}
 | "import" {IMPORT}
 | "exposing" {EXPOSING}
-
+| "case" {CASE}
+| "of" {OF}
 
 | "type" {TYPE}
 | "alias" {ALIAS}

@@ -23,17 +23,6 @@ let rec string_of_type (t:_type): string =
   | _ -> "later"
   ;;
 
-let rec string_of_expression (expr:expression) : string = 
-  match expr with
-  | Literal l -> string_of_literal l 
-  | Variable str -> str
-  | Record tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
-  | Access (ex, mn_li) ->  "acc "^ string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
-  | Application (ex1, ex2) -> "app "^ string_of_expression ex1 ^" \n " ^ string_of_expression ex2
-  | Tuple (ex_li) -> "(" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^")"
-  | _ -> "later"
-  ;;
-
 let rec string_of_pattern (pat:pattern) : string = 
   match pat with
   | PWildcard -> "_"
@@ -42,6 +31,22 @@ let rec string_of_pattern (pat:pattern) : string =
   | PApplication (p1, p2) -> string_of_pattern p1 ^ " " ^ string_of_pattern p2 
 
   ;;
+
+let rec string_of_expression (expr:expression) : string = 
+  match expr with
+  | Literal l -> string_of_literal l 
+  | Variable str -> str
+  | Record tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
+  | Access (ex, mn_li) ->  "acc "^ string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
+  | Application (ex1, ex2) -> "app "^ string_of_expression ex1 ^" \n " ^ string_of_expression ex2
+  | Tuple (ex_li) -> "(" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^")"
+  | Case (ex, p_ex_li) -> 
+    "case " ^ string_of_expression ex ^ " of " ^ 
+    "(" ^List.fold_left (fun acc (a, b) -> acc ^"\n " ^ string_of_pattern a ^" -> " ^ string_of_expression b) "" p_ex_li ^")"
+  | _ -> "later"
+  ;;
+
+
 
 let rec string_of_exportSet (ex: exportSet): string = 
   match ex with 
