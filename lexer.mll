@@ -56,6 +56,8 @@ rule token = parse
 | ')' { RPAR }
 | '{' { LBRACK  }
 | '}' { RBRACK }
+| '\\' {LAMDA}
+| "|>" {THEN_}
 | int      { INTE (int_of_string (Lexing.lexeme lexbuf)) }
 | '.' { CONCAT }
 

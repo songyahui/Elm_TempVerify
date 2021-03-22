@@ -9,7 +9,7 @@
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF
+%token CASE OF LAMDA THEN_
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -173,6 +173,21 @@ expression:
 | CASE ex1 = expr_term OF newlines 
 p = up_pattern IMPLY newlines ex = expression newline_none newlines 
 obj = bindings {Case (ex1, (p, ex) ::obj) }
+| t = lambda {t}
+|  b = binOp  {b}
+
+binOp:
+| e1 = expression THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
+| e1 = expression PLUS e2 = expression   {BinOp (Variable "+", e1, e2)}
+
+lambda:
+| LAMDA obj = pattern IMPLY ex = expression {
+  let rec applicationToList o = 
+    match o with 
+    | PApplication (p1, p2) -> List.append (applicationToList p1) (applicationToList p2)
+    | _ -> [o]
+  in Lambda (applicationToList obj, ex)}
+
 
 
 bindings:

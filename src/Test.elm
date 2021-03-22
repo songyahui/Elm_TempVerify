@@ -45,10 +45,12 @@ type Msg
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =  
     case msg of
-    Roll -> ( model)
-   --   , Process.sleep 1000
-    --    |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
-   --   )
+    Roll ->
+      ( model
+      , Process.sleep 1000
+        |> Task.perform (\_ ->  NewFace (model.dieFace + 1))
+      )
+    
 
     NewFace newFace ->
       ( Model newFace
