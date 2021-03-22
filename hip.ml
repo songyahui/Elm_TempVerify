@@ -28,16 +28,19 @@ let rec string_of_expression (expr:expression) : string =
   | Literal l -> string_of_literal l 
   | Variable str -> str
   | Record tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
-  | Access (ex, mn_li) ->  string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
-  | Application (ex1, ex2) -> string_of_expression ex1 ^" \n " ^ string_of_expression ex2
+  | Access (ex, mn_li) ->  "acc "^ string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
+  | Application (ex1, ex2) -> "app "^ string_of_expression ex1 ^" \n " ^ string_of_expression ex2
+  | Tuple (ex_li) -> "(" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^")"
   | _ -> "later"
   ;;
 
-let string_of_pattern (pat:pattern) : string = 
+let rec string_of_pattern (pat:pattern) : string = 
   match pat with
   | PWildcard -> "_"
   | PVariable mn -> mn
   | PLiteral l ->   string_of_literal l
+  | PApplication (p1, p2) -> string_of_pattern p1 ^ " " ^ string_of_pattern p2 
+
   ;;
 
 let rec string_of_exportSet (ex: exportSet): string = 

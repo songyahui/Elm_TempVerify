@@ -65,6 +65,8 @@ type literal = Character of char
 type pattern = PWildcard
     | PVariable of mn
     | PLiteral of literal
+    | PApplication of pattern * pattern
+
     (*
     | PConstructor of mn
     | PTuple of ( pattern list)
@@ -72,7 +74,6 @@ type pattern = PWildcard
     | PList of ( pattern list)
     | PRecord of (mn list)
     | PA of pattern * mn
-    | PApplication of pattern * pattern
     *)
 
 

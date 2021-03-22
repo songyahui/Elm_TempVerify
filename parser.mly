@@ -128,6 +128,7 @@ pattern:
 | UNDERLINE {PWildcard}
 | str = LVAR { PVariable str }
 | l = literal {PLiteral l}
+| p1= pattern p2 = pattern {PApplication (p1, p2)}
 
 
 expression: 
@@ -146,6 +147,7 @@ expr_term:
 | str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
 | str = loName {Variable str}
 | LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
+| LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
 
 
 record_aux: 
