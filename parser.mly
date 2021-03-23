@@ -94,11 +94,11 @@ statement:
 | TYPE ALIAS t1= _type newlines EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
 | mn = LVAR COLON t = typeAnnotation {FunctionTypeDeclaration (mn, t)}
 
-| TYPE t = _type newlines EQ newlines obj = separated_list (CHOICE, typeDeclaration ) {TypeDeclaration(t, obj)}
+| TYPE t = _type newlines EQ newlines t1 = typeConstructor newlines obj = typeDeclaration  {TypeDeclaration(t, t1::obj)}
 
 typeDeclaration:
-| t = typeConstructor newlines {t}
-
+|  {[]}
+|  CHOICE t = typeConstructor newlines obj = typeDeclaration {t:: obj}
 
 _type:
 | mn = LVAR {TypeVariable mn}
@@ -108,10 +108,15 @@ _type:
 | t = t_record {t}
 
 typeConstructor:
-| mn_li = UVAR obj = typeParameterAUX {TypeConstructor ([mn_li], obj ) }
+| mn = UVAR mn_li = typeConstructor_help obj = typeParameterAUX {TypeConstructor (mn::mn_li, obj ) }
+
+typeConstructor_help:
+| {[]}
+|  CONCAT mn = UVAR obj =  typeConstructor_help { mn:: obj}
+
 
 (*
-| mn_li = separated_list (CONCAT, UVAR) obj = typeParameterAUX {TypeConstructor (mn_li, obj ) }
+| mn_li = UVAR obj = typeParameterAUX {TypeConstructor ([mn_li], obj ) }
 
 *)
 
@@ -139,7 +144,8 @@ t_record:
 typeParameter:
 | mn = loName {TypeVariable mn}
 | t = t_record {t}
-
+| obj = typeTuple  {TypeTuple obj}
+| t = typeConstructor {t}
 
 
 moduleName:
@@ -179,6 +185,10 @@ obj = bindings {Case (ex1, (p, ex) ::obj) }
 binOp:
 | e1 = expression THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
 | e1 = expression PLUS e2 = expression   {BinOp (Variable "+", e1, e2)}
+| e1 = expression MINUS e2 = expression   {BinOp (Variable "-", e1, e2)}
+
+| e1 = expression EQ e2 = expression   {BinOp (Variable "=", e1, e2)}
+
 
 lambda:
 | LAMDA obj = pattern IMPLY ex = expression {
