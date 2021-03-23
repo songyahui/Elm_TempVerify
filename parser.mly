@@ -92,7 +92,7 @@ statement:
 | IMPORT str = moduleName alise = maybeNM export = maybeExport {ImportStatement (str, alise, export)}
 | MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
 | TYPE ALIAS t1= _type newlines EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
-| mn = LVAR COLON t = typeAnnotation {FunctionTypeDeclaration (mn, t)}
+| mn = LVAR COLON t = _type {FunctionTypeDeclaration (mn, t)}
 
 | TYPE t = _type newlines EQ newlines t1 = typeConstructor newlines obj = typeDeclaration  {TypeDeclaration(t, t1::obj)}
 

@@ -27,7 +27,7 @@ main =
 type alias Model = Int
 
 
-init : Model -> Int
+init : Model
 init =
   0
 
