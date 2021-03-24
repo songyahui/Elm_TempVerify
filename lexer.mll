@@ -75,7 +75,9 @@ rule token = parse
 | "in" {IN}
 | "type" {TYPE}
 | "alias" {ALIAS}
-
+| "if" {IF}
+| "else" {ELSE}
+| "then" {THEN}
 
 | "as" {AS}
 | "module" {MODULE}
@@ -164,10 +166,9 @@ and read_string buf = parse
 | "out" {OUT}
 | "end" {END}
 | "in" {IN}
-| "then" {THEN}
+
 | "when" {WHEN}
-| "if" {IF}
-| "else" {ELSE}
+
 | "count" { COUNT }
 | "abort" {ABORT} 
 | "halt" { NOTHING }

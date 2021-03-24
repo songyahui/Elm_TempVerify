@@ -11,6 +11,7 @@
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
 %token CASE OF LAMDA THEN_  DIV LET IN  PREPAND
+%token IF ELSE THEN 
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -190,7 +191,7 @@ expression:
   obj = bindings {Case (ex1, (p, ex) ::obj) }
 | t = lambda {t}
 | LET newlines obj = let_bindings newlines IN  newlines ex = expression {Let (obj, ex)}
-
+| IF ex1 = expression newlines THEN  newlines ex2 = expression  newlines ELSE newlines ex3 = expression {If (ex1, ex2, ex3)}
 
 let_bindings:
 | {[]}
@@ -226,6 +227,7 @@ binOp:
 | e1 = expression EQ e2 = expression   {BinOp (Variable "=", e1, e2)}
 | e1 = expression KLEENE e2 = expression   {BinOp (Variable "*", e1, e2)}
 | e1 = expression PREPAND e2 = expression   {BinOp (Variable "::", e1, e2)}
+| e1 = expression LT e2 = expression   {BinOp (Variable "<", e1, e2)}
 
 
 lambda:
