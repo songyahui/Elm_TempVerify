@@ -4,12 +4,13 @@
 %token NEWLINE
 %token <string> UVAR LVAR COP STRING
 %token <int> INTE
+%token <float> FLOAT
 %token <bool> TRUEE FALSEE 
 %token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF LAMDA THEN_  DIV
+%token CASE OF LAMDA THEN_  DIV LET IN 
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -182,6 +183,14 @@ expression:
   p = up_pattern IMPLY newlines ex = expression newline_none newlines 
   obj = bindings {Case (ex1, (p, ex) ::obj) }
 | t = lambda {t}
+| LET newlines obj = let_bindings newlines IN  newlines ex = expression {Let (obj, ex)}
+
+
+let_bindings:
+| {[]}
+|  p = pattern EQ  ex = expression newlines  b = let_bindings {(p, ex):: b}
+
+
 
 
 maybeExpr:
@@ -209,7 +218,7 @@ binOp:
 | e1 = expression MINUS e2 = expression   {BinOp (Variable "-", e1, e2)}
 | e1 = expression DIV e2 = expression   {BinOp (Variable "/", e1, e2)}
 | e1 = expression EQ e2 = expression   {BinOp (Variable "=", e1, e2)}
-
+| e1 = expression KLEENE e2 = expression   {BinOp (Variable "*", e1, e2)}
 
 lambda:
 | LAMDA obj = pattern IMPLY ex = expression {
@@ -256,6 +265,7 @@ record_aux:
 literal: 
 | n = INTE {Integer n}
 | str = STRING {String str}
+| f = FLOAT {Float f }
 
 loName: 
 | UNDERLINE {"_"}

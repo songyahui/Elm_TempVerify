@@ -90,7 +90,11 @@ view : Model -> Html Msg
 view model =
   let
     hour   = toFloat (Time.toHour   model.zone model.time)
+
+
     minute = toFloat (Time.toMinute model.zone model.time)
+
+
     second = toFloat (Time.toSecond model.zone model.time)
   in
   svg
@@ -109,7 +113,11 @@ viewHand : Int -> Float -> Float -> Svg msg
 viewHand width length turns =
   let
     t = 2 * pi * (turns - 0.25)
+
+
     x = 200 + length * cos t
+
+    
     y = 200 + length * sin t
   in
   line
