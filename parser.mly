@@ -9,8 +9,8 @@
 %token  LPAR RPAR SIMI LBrackets  RBrackets  COMMA LBRACK RBRACK      
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
-%token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF LAMDA THEN_  DIV LET IN  PREPAND
+%token IMPORT EXPOSING AS ALLEX MODULE CHOICE EQEQ
+%token CASE OF LAMDA THEN_  DIV LET IN  PREPAND PLUSPLUS LTCHOICE
 %token IF ELSE THEN 
 (*  POWER
 %token THEN ELSE ABORT WHEN 
@@ -195,7 +195,7 @@ expression:
 
 let_bindings:
 | {[]}
-|  p = pattern EQ  ex = expression newlines  b = let_bindings {(p, ex):: b}
+|  p = pattern EQ  newlines ex = expression newlines  b = let_bindings {(p, ex):: b}
 
 
 
@@ -220,7 +220,7 @@ bindings:
 
 
 binOp:
-| e1 = expression THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
+| e1 = expression newlines THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
 | e1 = expression PLUS e2 = expression   {BinOp (Variable "+", e1, e2)}
 | e1 = expression MINUS e2 = expression   {BinOp (Variable "-", e1, e2)}
 | e1 = expression DIV e2 = expression   {BinOp (Variable "/", e1, e2)}
@@ -228,6 +228,10 @@ binOp:
 | e1 = expression KLEENE e2 = expression   {BinOp (Variable "*", e1, e2)}
 | e1 = expression PREPAND e2 = expression   {BinOp (Variable "::", e1, e2)}
 | e1 = expression LT e2 = expression   {BinOp (Variable "<", e1, e2)}
+| e1 = expression GT e2 = expression   {BinOp (Variable ">", e1, e2)}
+| e1 = expression PLUSPLUS e2 = expression   {BinOp (Variable "++", e1, e2)}
+| e1 = expression LTCHOICE newlines e2 = expression   {BinOp (Variable ">|", e1, e2)}
+| e1 = expression EQEQ e2 = expression   {BinOp (Variable "==", e1, e2)}
 
 
 lambda:

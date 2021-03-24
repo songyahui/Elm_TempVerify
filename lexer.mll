@@ -48,6 +48,7 @@ rule token = parse
 | "<=" {LTEQ}
 | '>' {GT}
 | '<' {LT}
+| "==" {EQEQ}
 | '=' {EQ}
 | "/\\" {CONJ}
 | '|' { CHOICE }
@@ -86,6 +87,8 @@ rule token = parse
 | lower_id as str { LVAR str }
 | "|-" {ENTIL}
 | "\\/" {DISJ}
+| "++" { PLUSPLUS }
+| "<|" {LTCHOICE}
 | '+' { PLUS }
 | '-' { MINUS }
 | '~' {NEGATION}

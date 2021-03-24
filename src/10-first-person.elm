@@ -150,7 +150,7 @@ updatePerson dt keys person =
     , velocity = velocity
     }
 
-{-
+
 stepVelocity : Float -> Keys -> Person -> Vec3
 stepVelocity dt { left, right, up, down, space } person =
   if Vec3.getY person.position > eyeLevel then
@@ -161,8 +161,6 @@ stepVelocity dt { left, right, up, down, space } person =
         (if positive then 1 else 0) - (if negative then 1 else 0)
     in
     vec3 (toV left right) (if space then 2 else 0) (toV up down)
-
-
 
 -- SUBSCRIPTIONS
 
@@ -178,9 +176,7 @@ subscriptions model =
     ]
 
 
-
 -- VIEW
-
 
 view : Model -> Html Msg
 view model =
@@ -209,7 +205,6 @@ view model =
     , keyboardInstructions model.keys
     ]
 
-
 viewCrate : Float -> Float -> Person -> Texture.Texture -> WebGL.Entity
 viewCrate width height person texture =
   let
@@ -222,7 +217,6 @@ viewCrate width height person texture =
     { texture = texture
     , perspective = perspective
     }
-
 
 keyboardInstructions : Keys -> Html msg
 keyboardInstructions keys =
@@ -238,8 +232,6 @@ keyboardInstructions keys =
     , p [] [ text "Arrows keys to move, space bar to jump." ]
     ]
 
-
-
 -- MESH
 
 
@@ -247,7 +239,6 @@ type alias Vertex =
   { position : Vec3
   , coord : Vec2
   }
-
 
 crate : WebGL.Mesh Vertex
 crate =
@@ -259,27 +250,6 @@ crate =
     , (0, 90)
     , (0, -90)
     ]
-
-
-rotatedSquare : (Float, Float) -> List (Vertex, Vertex, Vertex)
-rotatedSquare ( angleXZ, angleYZ ) =
-  let
-    transformMat =
-      Mat4.mul
-        (Mat4.makeRotate (degrees angleXZ) Vec3.j)
-        (Mat4.makeRotate (degrees angleYZ) Vec3.i)
-
-    transform vertex =
-      { vertex
-          | position =
-              Mat4.transform transformMat vertex.position
-      }
-
-    transformTriangle (a, b, c) =
-      (transform a, transform b, transform c)
-  in
-  List.map transformTriangle square
-
 
 square : List ( Vertex, Vertex, Vertex )
 square =
@@ -302,6 +272,31 @@ type alias Uniforms =
   { texture : Texture.Texture
   , perspective : Mat4
   }
+
+
+
+
+
+{-
+
+rotatedSquare : (Float, Float) -> List (Vertex, Vertex, Vertex)
+rotatedSquare ( angleXZ, angleYZ ) =
+  let
+    transformMat =
+      Mat4.mul
+        (Mat4.makeRotate (degrees angleXZ) Vec3.j)
+        (Mat4.makeRotate (degrees angleYZ) Vec3.i)
+
+    transform vertex =
+      { vertex
+          | position =
+              Mat4.transform transformMat vertex.position
+      }
+
+    transformTriangle (a, b, c) =
+      (transform a, transform b, transform c)
+  in
+  List.map transformTriangle square
 
 
 vertexShader : WebGL.Shader Vertex Uniforms { vcoord : Vec2 }
