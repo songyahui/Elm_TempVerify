@@ -29,7 +29,8 @@ let rec string_of_pattern (pat:pattern) : string =
   | PVariable mn -> mn
   | PLiteral l ->   string_of_literal l
   | PApplication (p1, p2) -> string_of_pattern p1 ^ " " ^ string_of_pattern p2 
-
+  | PTuple p_li -> "(" ^ List.fold_left (fun acc a -> acc ^","^ string_of_pattern a ) "" p_li ^ ")"
+  | PRecord obj -> "{" ^ List.fold_left (fun acc a -> acc ^","^ a ) "" obj ^ "}"
   ;;
 
 let rec string_of_expression (expr:expression) : string = 
@@ -37,8 +38,8 @@ let rec string_of_expression (expr:expression) : string =
   | Literal l -> string_of_literal l 
   | Variable str -> str
   | Record tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
-  | Access (ex, mn_li) ->  "acc "^ string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
-  | Application (ex1, ex2) -> "app "^ string_of_expression ex1 ^" \n " ^ string_of_expression ex2
+  | Access (ex, mn_li) ->  " "^ string_of_expression ex ^ List.fold_left (fun acc a -> acc ^"."^a) "." mn_li 
+  | Application (ex1, ex2) -> " "^ string_of_expression ex1 ^" " ^ string_of_expression ex2
   | Tuple (ex_li) -> "(" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^")"
   | Case (ex, p_ex_li) -> 
     "case " ^ string_of_expression ex ^ " of " ^ 
@@ -47,7 +48,7 @@ let rec string_of_expression (expr:expression) : string =
   | BinOp (e1, e2, e3) -> string_of_expression e2 ^ " "^ string_of_expression e1 ^ " " ^ string_of_expression e3
   | List ex_li -> "[" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^"]"
   | RecordUpdate (str, tuple_li) -> "{" ^ str ^ " | " ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
-
+  | Let ( p_ex_li, ex) -> "let" ^ List.fold_left (fun acc (a, b) -> acc ^"\n" ^string_of_pattern a^"="^ string_of_expression b ) "" p_ex_li ^ "in\n"^string_of_expression ex
   | _ -> "later"
   ;;
 
@@ -88,7 +89,7 @@ let string_of_statement (state:statement) : string =
 let rec string_of_program (states : statement list) : string =
   match states with
     [] -> ""
-  | x::xs -> string_of_statement x ^ "\n" ^ string_of_program xs 
+  | x::xs -> string_of_statement x ^ "\n\n" ^ string_of_program xs 
   ;;
 
 

@@ -66,13 +66,14 @@ type pattern = PWildcard
     | PVariable of mn
     | PLiteral of literal
     | PApplication of pattern * pattern
+    | PTuple of ( pattern list)
+    | PRecord of (mn list)
 
     (*
     | PConstructor of mn
-    | PTuple of ( pattern list)
     | PCons of pattern * pattern
     | PList of ( pattern list)
-    | PRecord of (mn list)
+    
     | PA of pattern * mn
     *)
 

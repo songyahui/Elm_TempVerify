@@ -76,6 +76,7 @@ view angle =
     [ WebGL.entity vertexShader fragmentShader cubeMesh (uniforms angle)
     ]
 
+{-
 
 type alias Uniforms =
   { rotation : Mat4
@@ -167,3 +168,5 @@ fragmentShader =
         gl_FragColor = 0.8 * vec4(vcolor, 1.0);
     }
   |]
+
+-}

@@ -123,6 +123,7 @@ update msg model =
       { model | keys = noKeys }
 
 
+{-
 updateKeys : Bool -> String -> Keys -> Keys
 updateKeys isDown key keys =
   case key of
@@ -132,7 +133,7 @@ updateKeys isDown key keys =
     "ArrowDown"  -> { keys | down  = isDown }
     "ArrowRight" -> { keys | right = isDown }
     _            -> keys
-
+-}
 
 updatePerson : Float -> Keys -> Person -> Person
 updatePerson dt keys person =
@@ -149,7 +150,7 @@ updatePerson dt keys person =
     , velocity = velocity
     }
 
-
+{-
 stepVelocity : Float -> Keys -> Person -> Vec3
 stepVelocity dt { left, right, up, down, space } person =
   if Vec3.getY person.position > eyeLevel then
@@ -329,3 +330,5 @@ fragmentShader =
       gl_FragColor = texture2D(texture, vcoord);
     }
   |]
+
+-}

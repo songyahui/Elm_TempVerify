@@ -10,7 +10,7 @@
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF LAMDA THEN_  DIV LET IN 
+%token CASE OF LAMDA THEN_  DIV LET IN  PREPAND
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -159,7 +159,13 @@ pattern:
 | UNDERLINE {PWildcard}
 | str = loName { PVariable str }
 | l = literal {PLiteral l}
+| p = patternTuple {PTuple p}
 | p1= pattern p2 = pattern {PApplication (p1, p2)}
+| LBRACK obj = separated_list(COMMA, LVAR) RBRACK {PRecord obj}
+
+patternTuple:
+| LPAR RPAR {[]}
+| LPAR obj = separated_list (COMMA, pattern) RPAR {obj}
 
 
 up_pattern:
@@ -219,6 +225,8 @@ binOp:
 | e1 = expression DIV e2 = expression   {BinOp (Variable "/", e1, e2)}
 | e1 = expression EQ e2 = expression   {BinOp (Variable "=", e1, e2)}
 | e1 = expression KLEENE e2 = expression   {BinOp (Variable "*", e1, e2)}
+| e1 = expression PREPAND e2 = expression   {BinOp (Variable "::", e1, e2)}
+
 
 lambda:
 | LAMDA obj = pattern IMPLY ex = expression {
@@ -240,14 +248,14 @@ expr_term:
 | str = loName {Variable str}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
 | LBrackets obj = separated_list (COMMA, expression) RBrackets {List obj}
-| LBRACK str = LVAR r = record_or_record_update RBRACK {
+| LBRACK str = LVAR newlines r = record_or_record_update RBRACK {
   match r with 
   | (None, obj) -> RecordUpdate( str, obj)
   | (Some ex, obj) -> Record ((str, ex)::obj)
   }
 
 record_or_record_update:
-| CHOICE obj = separated_list (COMMA, record_aux) {(None, obj)} (*RecordUpdate *)
+| CHOICE newlines obj = separated_list (COMMA, record_aux) {(None, obj)} (*RecordUpdate *)
 | EQ newlines ex =expression newlines  mo = record_help  {
   match mo with 
   | None -> (Some ex, [])

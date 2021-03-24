@@ -100,6 +100,7 @@ view model =
 
 -- UNIFORMS
 
+{-
 
 type alias Uniforms =
   { rotation : Mat4
@@ -215,3 +216,4 @@ fragmentShader =
         gl_FragColor = texture2D(texture, vcoord);
     }
   |]
+-}

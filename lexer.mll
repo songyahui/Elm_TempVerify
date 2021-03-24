@@ -64,7 +64,7 @@ rule token = parse
 | '\\' {LAMDA}
 | "|>" {THEN_}
 | '.' { CONCAT }
-
+| "::" {PREPAND}
 | 'X' {NEXT}
 | 'U' {UNTIL}
 | "import" {IMPORT}
