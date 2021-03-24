@@ -9,7 +9,7 @@
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE
-%token CASE OF LAMDA THEN_ 
+%token CASE OF LAMDA THEN_  DIV
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -168,25 +168,46 @@ up_pattern:
 | p1= up_pattern p2 = pattern {PApplication (p1, p2)}
 
 
-
-
+(*
+   [              binary ops
+                , letExpression ops
+                , caseExpression ops
+                , ifExpression ops
+                , lambda ops
+                ]
+*)
 expression: 
+| b = binary {b}
+| CASE ex1 = expr_term OF newlines 
+  p = up_pattern IMPLY newlines ex = expression newline_none newlines 
+  obj = bindings {Case (ex1, (p, ex) ::obj) }
+| t = lambda {t}
+
+
+maybeExpr:
+| {None}
+| t = expression {Some t}
+
+binary:
 | t = expr_term newline_none m = maybeExpr {
   match m with
   | None -> t
   | Some t2 -> Application (t, t2)
 }
-| CASE ex1 = expr_term OF newlines 
-p = up_pattern IMPLY newlines ex = expression newline_none newlines 
-obj = bindings {Case (ex1, (p, ex) ::obj) }
-| t = lambda {t}
 |  b = binOp  {b}
+
+
+
+bindings:
+| {[]}
+|  p = up_pattern IMPLY newlines ex = expression newline_none newlines  b = bindings {(p, ex):: b}
+
 
 binOp:
 | e1 = expression THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
 | e1 = expression PLUS e2 = expression   {BinOp (Variable "+", e1, e2)}
 | e1 = expression MINUS e2 = expression   {BinOp (Variable "-", e1, e2)}
-
+| e1 = expression DIV e2 = expression   {BinOp (Variable "/", e1, e2)}
 | e1 = expression EQ e2 = expression   {BinOp (Variable "=", e1, e2)}
 
 
@@ -200,24 +221,33 @@ lambda:
 
 
 
-bindings:
-| {[]}
-|  p = up_pattern IMPLY newlines ex = expression newline_none newlines  b = bindings {(p, ex):: b}
 
 
-maybeExpr:
-| {None}
-| t = expression {Some t}
+
 
 expr_term:
 | l = literal {Literal l }
 | str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
 | str = loName {Variable str}
-| LBRACK obj = separated_list (COMMA, record_aux)  RBRACK  {Record obj}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
 | LBrackets obj = separated_list (COMMA, expression) RBrackets {List obj}
+| LBRACK str = LVAR r = record_or_record_update RBRACK {
+  match r with 
+  | (None, obj) -> RecordUpdate( str, obj)
+  | (Some ex, obj) -> Record ((str, ex)::obj)
+  }
+
+record_or_record_update:
+| CHOICE obj = separated_list (COMMA, record_aux) {(None, obj)} (*RecordUpdate *)
+| EQ newlines ex =expression newlines  mo = record_help  {
+  match mo with 
+  | None -> (Some ex, [])
+  | Some obj ->  (Some ex, obj)}
 
 
+record_help:
+| {None}
+| COMMA obj = separated_list (COMMA, record_aux) {Some obj}
 
 record_aux: 
 | newlines str = LVAR EQ ex =expression newlines {(str, ex)}

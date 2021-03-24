@@ -46,6 +46,8 @@ let rec string_of_expression (expr:expression) : string =
   | Lambda (p_li, ex) -> "(" ^List.fold_left (fun acc a -> acc ^" " ^ string_of_pattern a) "\\" p_li ^" -> e"^ string_of_expression ex ^")"
   | BinOp (e1, e2, e3) -> string_of_expression e2 ^ " "^ string_of_expression e1 ^ " " ^ string_of_expression e3
   | List ex_li -> "[" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^"]"
+  | RecordUpdate (str, tuple_li) -> "{" ^ str ^ " | " ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
+
   | _ -> "later"
   ;;
 

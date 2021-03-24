@@ -142,7 +142,7 @@ viewCard card =
     Ten -> "0"
 
     Jack -> "1"
-
-    Queen -> "2"
     
+    Queen -> "2"
+
     King -> "3"
