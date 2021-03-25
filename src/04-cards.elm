@@ -122,7 +122,7 @@ viewCard : Card -> String
 viewCard card =
   case card of
     Ace -> "1"
-
+    
     Two -> "2"
 
     Three -> "3"

@@ -285,7 +285,7 @@ record_help:
 | COMMA obj = separated_list (COMMA, record_aux) {Some obj}
 
 record_aux: 
-| newlines str = LVAR EQ ex =expression newlines {(str, ex)}
+| newlines str = LVAR EQ newlines ex =expression newlines {(str, ex)}
 
 
 literal: 

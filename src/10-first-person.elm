@@ -274,11 +274,6 @@ type alias Uniforms =
   }
 
 
-
-
-
-{-
-
 rotatedSquare : (Float, Float) -> List (Vertex, Vertex, Vertex)
 rotatedSquare ( angleXZ, angleYZ ) =
   let
@@ -297,6 +292,11 @@ rotatedSquare ( angleXZ, angleYZ ) =
       (transform a, transform b, transform c)
   in
   List.map transformTriangle square
+
+
+
+{-
+
 
 
 vertexShader : WebGL.Shader Vertex Uniforms { vcoord : Vec2 }

@@ -100,7 +100,6 @@ view model =
 
 -- UNIFORMS
 
-{-
 
 type alias Uniforms =
   { rotation : Mat4
@@ -108,7 +107,6 @@ type alias Uniforms =
   , camera : Mat4
   , texture : Texture.Texture
   }
-
 
 toUniforms : Float -> Texture.Texture -> Uniforms
 toUniforms angle texture =
@@ -122,6 +120,7 @@ toUniforms angle texture =
   }
 
 
+
 perspective : Mat4
 perspective =
   Mat4.makePerspective 45 1 0.01 100
@@ -130,7 +129,6 @@ perspective =
 camera : Mat4
 camera =
   Mat4.makeLookAt (vec3 0 0 5) (vec3 0 0 0) (vec3 0 1 0)
-
 
 
 -- MESH
@@ -153,7 +151,6 @@ crateMesh =
     , (0, 270)
     ]
 
-
 rotatedSquare : (Float, Float) -> List (Vertex, Vertex, Vertex)
 rotatedSquare (angleXZ, angleYZ) =
   let
@@ -171,6 +168,7 @@ rotatedSquare (angleXZ, angleYZ) =
   List.map transformTriangle square
 
 
+
 square : List ( Vertex, Vertex, Vertex )
 square =
   let
@@ -184,7 +182,7 @@ square =
   ]
 
 
-
+{-
 -- SHADERS
 
 
