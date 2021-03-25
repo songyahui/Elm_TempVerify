@@ -56,6 +56,7 @@ update computer mario =
   let
     dt = 1.666
     vx = toX computer.keyboard
+    
     vy =
       if mario.y == 0 then
         if computer.keyboard.up then 5 else 0

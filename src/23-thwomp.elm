@@ -253,7 +253,7 @@ type alias Uniforms =
   , texture : Texture.Texture
   }
 
-
+{-
 vertexShader : WebGL.Shader Vertex Uniforms { vcoord : Vec2 }
 vertexShader =
   [glsl|
@@ -280,3 +280,4 @@ fragmentShader =
       gl_FragColor = texture2D(texture, vcoord);
     }
   |]
+-}

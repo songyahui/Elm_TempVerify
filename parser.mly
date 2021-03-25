@@ -10,8 +10,8 @@
 %token  MINUS PLUS POWER TRUEToken COLON FALSEToken NEGATION
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE EQEQ
-%token CASE OF LAMDA THEN_  DIV LET IN  PREPAND PLUSPLUS LTCHOICE
-%token IF ELSE THEN 
+%token CASE OF LAMDA THEN_  DIV DIVEQ LET IN  PREPAND PLUSPLUS LTCHOICE
+%token IF ELSE THEN  PORT
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -95,8 +95,13 @@ statement:
 | MODULE mn = moduleName EXPOSING LPAR expSet = exportSet RPAR {ModuleDeclaration (mn, expSet)}
 | TYPE ALIAS t1= _type newlines EQ newlines t2 = _type {TypeAliasDeclaration (t1, t2)}
 | mn = LVAR COLON t = _type {FunctionTypeDeclaration (mn, t)}
-
 | TYPE t = _type newlines EQ newlines t1 = typeConstructor newlines obj = typeDeclaration  {TypeDeclaration(t, t1::obj)}
+| PORT p = port_aux {p}
+
+port_aux:
+| mn = LVAR COLON t = typeAnnotation { PortTypeDeclaration (mn, t)}
+| MODULE mn = moduleName EXPOSING  LPAR expSet = exportSet RPAR {PortModuleDeclaration (mn, expSet)}
+
 
 typeDeclaration:
 |  {[]}
@@ -186,12 +191,13 @@ up_pattern:
 *)
 expression: 
 | b = binary {b}
-| CASE ex1 = expr_term OF newlines 
+| CASE ex1 = expression OF newlines 
   p = up_pattern IMPLY newlines ex = expression newline_none newlines 
   obj = bindings {Case (ex1, (p, ex) ::obj) }
 | t = lambda {t}
 | LET newlines obj = let_bindings newlines IN  newlines ex = expression {Let (obj, ex)}
 | IF ex1 = expression newlines THEN  newlines ex2 = expression  newlines ELSE newlines ex3 = expression {If (ex1, ex2, ex3)}
+
 
 let_bindings:
 | {[]}
@@ -220,7 +226,7 @@ bindings:
 
 
 binOp:
-| e1 = expression newlines THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
+| e1 = expression THEN_ e2 = expression   {BinOp (Variable "|>", e1, e2)}
 | e1 = expression PLUS e2 = expression   {BinOp (Variable "+", e1, e2)}
 | e1 = expression MINUS e2 = expression   {BinOp (Variable "-", e1, e2)}
 | e1 = expression DIV e2 = expression   {BinOp (Variable "/", e1, e2)}
@@ -232,10 +238,12 @@ binOp:
 | e1 = expression PLUSPLUS e2 = expression   {BinOp (Variable "++", e1, e2)}
 | e1 = expression LTCHOICE newlines e2 = expression   {BinOp (Variable ">|", e1, e2)}
 | e1 = expression EQEQ e2 = expression   {BinOp (Variable "==", e1, e2)}
+| e1 = expression DIVEQ e2 = expression   {BinOp (Variable "/=", e1, e2)}
+
 
 
 lambda:
-| LAMDA obj = pattern IMPLY ex = expression {
+| LAMDA obj = pattern IMPLY newlines ex = expression {
   let rec applicationToList o = 
     match o with 
     | PApplication (p1, p2) -> List.append (applicationToList p1) (applicationToList p2)
@@ -243,22 +251,24 @@ lambda:
   in Lambda (applicationToList obj, ex)}
 
 
-
-
-
-
-
 expr_term:
 | l = literal {Literal l }
-| str = loName CONCAT f = LVAR {Access  (Variable str, [f])}
+| str = loName CONCAT f = LVAR  obj =  access_aux {Access  (Variable str, f::obj)}
 | str = loName {Variable str}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
-| LBrackets obj = separated_list (COMMA, expression) RBrackets {List obj}
+| LBrackets obj = separated_list (COMMA, list_aux) RBrackets {List obj}
 | LBRACK str = LVAR newlines r = record_or_record_update RBRACK {
   match r with 
   | (None, obj) -> RecordUpdate( str, obj)
   | (Some ex, obj) -> Record ((str, ex)::obj)
   }
+
+list_aux:
+| ex = expression newlines {ex}
+
+access_aux:
+| {[]}
+| CONCAT f = LVAR obj = access_aux  {f::obj}
 
 record_or_record_update:
 | CHOICE newlines obj = separated_list (COMMA, record_aux) {(None, obj)} (*RecordUpdate *)

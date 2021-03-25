@@ -105,8 +105,9 @@ type statement =
     | PortDeclaration of mn * ( mn list)  * expression
     | FunctionTypeDeclaration of mn * _type
     | FunctionDeclaration of pattern * expression
-    (*
     | PortModuleDeclaration of mn * exportSet
+
+    (*
     | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
     *)
 

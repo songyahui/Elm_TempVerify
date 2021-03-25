@@ -82,6 +82,9 @@ let string_of_statement (state:statement) : string =
   | TypeAliasDeclaration (t1, t2) -> string_of_type t1 ^" = " ^ string_of_type t2
   | TypeDeclaration (t1, t2_li) -> string_of_type t1 ^" = " ^ List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t2_li
   | FunctionTypeDeclaration (mn, t) -> mn ^ " : " ^ string_of_type t
+  | ModuleDeclaration (mn, exportSet) -> "module " ^ mn ^ " exposing " ^  string_of_exportSet exportSet
+  | PortModuleDeclaration (mn, exportSet) -> "module " ^ mn ^ " exposing " ^  string_of_exportSet exportSet
+  | PortTypeDeclaration (mn, t) -> "port " ^ mn ^ ":"^string_of_type t 
   | _ -> "later"
 
   ;;

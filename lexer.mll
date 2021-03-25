@@ -37,7 +37,7 @@ rule token = parse
 *)
 }
 | int      { INTE (int_of_string (Lexing.lexeme lexbuf)) }
-| float {print_string (Lexing.lexeme lexbuf); FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
+| float { FLOAT (float_of_string (Lexing.lexeme lexbuf)) }
 
 | "TRUE" { TRUEToken }
 | "FALSE" { FALSEToken }
@@ -61,6 +61,7 @@ rule token = parse
 | '}' { RBRACK }
 | '[' { LBrackets }
 | ']' { RBrackets }
+| "/=" {DIVEQ}
 | '/' {DIV}
 | '\\' {LAMDA}
 | "|>" {THEN_}
@@ -79,7 +80,7 @@ rule token = parse
 | "if" {IF}
 | "else" {ELSE}
 | "then" {THEN}
-
+| "port" {PORT}
 | "as" {AS}
 | "module" {MODULE}
 | ".." {ALLEX}
