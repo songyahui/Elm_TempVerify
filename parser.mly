@@ -176,11 +176,13 @@ patternTuple:
 
 up_pattern:
 | UNDERLINE {PWildcard}
-| str = UVAR { PVariable str }
+| str = UVAR obj = pattern_up_help { PVariable (List.fold_left (fun acc a -> acc ^ "." ^a) str obj) }
 | l = literal {PLiteral l}
 | p1= up_pattern p2 = pattern {PApplication (p1, p2)}
 
-
+pattern_up_help:
+| {[]}
+| CONCAT  s= UVAR obj = pattern_up_help {s::obj} 
 (*
    [              binary ops
                 , letExpression ops
@@ -253,7 +255,7 @@ lambda:
 
 expr_term:
 | l = literal {Literal l }
-| str = loName CONCAT f = LVAR  obj =  access_aux {Access  (Variable str, f::obj)}
+| str = loName CONCAT f = loName  obj =  access_aux {Access  (Variable str, f::obj)}
 | str = loName {Variable str}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
 | LBrackets obj = separated_list (COMMA, list_aux) RBrackets {List obj}
@@ -268,7 +270,7 @@ list_aux:
 
 access_aux:
 | {[]}
-| CONCAT f = LVAR obj = access_aux  {f::obj}
+| CONCAT f = loName obj = access_aux  {f::obj}
 
 record_or_record_update:
 | CHOICE newlines obj = separated_list (COMMA, record_aux) {(None, obj)} (*RecordUpdate *)

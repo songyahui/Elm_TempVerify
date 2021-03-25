@@ -323,3 +323,92 @@ update msg model =
 -- The clause _ -> catches all other strings, which means that all other
 -- URL hashes will show all of the todos.
 
+
+urlToFilter : Url -> Filter
+urlToFilter url =
+    case url.fragment of
+        Nothing ->
+            All
+
+        Just hash ->
+            case String.toLower hash of
+                "incomplete" ->
+                    Incomplete
+
+                "completed" ->
+                    Completed
+
+                _ ->
+                    All
+
+
+port saveTodos : List Todo -> Cmd msg
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
+
+
+
+-- We're now using Browser.application, whose init function requires two additional
+-- arguments:
+-- 1. Url  - This will be passed to us by Elm runtime when the application is
+-- initialized.
+-- In our app we're using the URL to parse the currently active filter from
+-- the URL's fragment (the part of URL following the '#' character).
+-- We use (urlToFilter url) which returns the filter that we will use for that URL.
+--  So if the page's URL is initially "/#completed", then (urlToFilter url) will
+-- return Completed as the filter, so the filter value will be Completed,
+-- which will lead to the completed todos to be shown.
+-- 2. Key is the navigation key that we need to save into our model. We need it
+-- to be able to control the browser's page loading functionality
+-- (see LinkClicked branch of the update function for how the Key is used).
+
+
+init : Flags -> Url -> Key -> ( Model, Cmd Msg )
+init flags url navigationKey =
+    ( { text = ""
+      , todos = flags.todos
+      , editing = Nothing
+      , filter = urlToFilter url
+      , navigationKey = navigationKey
+      }
+    , Cmd.none
+    )
+
+
+type alias Flags =
+    { todos : List Todo }
+
+
+
+{-
+   We're using Browser.application instead of Browser.element, which extends the
+   latter in 3 important ways:
+
+   1. init gets two additional parameters:
+     - the current Url from the browsers navigation bar.
+     This allows you to show different things depending on the Url.
+     - the navigation Key, which you can save in your model and use it later to be able
+     add items to manipulate browser's navigation history
+
+   2. When someone clicks a link, like <a href="/home">Home</a>, it is intercepted
+   as a UrlRequest. So instead of loading new HTML, onUrlRequest creates a message
+   for your update where you can decide exactly what to do next.
+
+   3. When the URL changes, the new Url is sent to onUrlChange.
+   The resulting message goes to update where you can decide how to show the new page.
+-}
+
+
+main : Program Flags Model Msg
+main =
+    application
+        { init = init
+        , view = view
+        , update = update
+        , subscriptions = subscriptions
+        , onUrlRequest = LinkClicked
+        , onUrlChange = ChangeUrl
+        }

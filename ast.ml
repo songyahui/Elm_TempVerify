@@ -73,7 +73,6 @@ type pattern = PWildcard
     | PConstructor of mn
     | PCons of pattern * pattern
     | PList of ( pattern list)
-    
     | PA of pattern * mn
     *)
 
