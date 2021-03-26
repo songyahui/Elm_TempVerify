@@ -50,6 +50,7 @@ let rec string_of_expression (expr:expression) : string =
   | RecordUpdate (str, tuple_li) -> "{" ^ str ^ " | " ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
   | Let ( p_ex_li, ex) -> "let" ^ List.fold_left (fun acc (a, b) -> acc ^"\n" ^string_of_pattern a^"="^ string_of_expression b ) "" p_ex_li ^ "in\n"^string_of_expression ex
   | If (ex1, ex2, ex3) -> "if " ^ string_of_expression ex1 ^ " then " ^ string_of_expression ex2 ^ " else " ^ string_of_expression ex3 
+  | Glsl -> "Glsl expression"
   | _ -> "later"
   ;;
 

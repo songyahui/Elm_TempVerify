@@ -78,6 +78,7 @@ type pattern = PWildcard
 
 
 
+
 type expression = Literal of literal 
     | Variable of mn
     | List of ( expression list)
@@ -92,6 +93,7 @@ type expression = Literal of literal
     | Lambda of (pattern list) * expression
     | Application of expression * expression
     | BinOp of expression * expression * expression
+    | Glsl 
 
 
 (* -| Representations for Elm's statements.*)

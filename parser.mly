@@ -11,7 +11,7 @@
 %token EOF GT LT EQ CONJ GTEQ LTEQ ENTIL EMPTY DISJ  CONCAT UNDERLINE KLEENE OMEGA 
 %token IMPORT EXPOSING AS ALLEX MODULE CHOICE EQEQ
 %token CASE OF LAMDA THEN_  DIV DIVEQ LET IN  PREPAND PLUSPLUS LTCHOICE
-%token IF ELSE THEN  PORT
+%token IF ELSE THEN  PORT GLSL VOID 
 (*  POWER
 %token THEN ELSE ABORT WHEN 
 AWAIT ASYNC ASSERT  COUNT QUESTION SHARP
@@ -258,12 +258,23 @@ expr_term:
 | str = loName CONCAT f = loName  obj =  access_aux {Access  (Variable str, f::obj)}
 | str = loName {Variable str}
 | LPAR obj = separated_list (COMMA, expression) RPAR {Tuple obj}
-| LBrackets obj = separated_list (COMMA, list_aux) RBrackets {List obj}
+| LBrackets ex =  glsl_or_list {ex}
 | LBRACK str = LVAR newlines r = record_or_record_update RBRACK {
   match r with 
   | (None, obj) -> RecordUpdate( str, obj)
   | (Some ex, obj) -> Record ((str, ex)::obj)
   }
+
+glsl_or_list:
+| GLSL CHOICE newlines separated_list (SIMI, glsl_expression)  newlines  CHOICE RBrackets {Glsl}
+| obj = separated_list (COMMA, list_aux) RBrackets {List obj} 
+
+glsl_expression:
+| newlines  expression newlines {()}
+| newlines VOID LVAR expr_term LBRACK  newlines  separated_list (SIMI, glsl_expression) newlines RBRACK newlines {()}
+
+
+
 
 list_aux:
 | ex = expression newlines {ex}

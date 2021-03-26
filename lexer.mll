@@ -82,7 +82,9 @@ rule token = parse
 | "then" {THEN}
 | "port" {PORT}
 | "as" {AS}
+| "glsl" {GLSL}
 | "module" {MODULE}
+| "void" {VOID}
 | ".." {ALLEX}
 | upper_id as str { UVAR str }
 | lower_id as str { LVAR str }
@@ -107,6 +109,7 @@ rule token = parse
 | '!' {LTLNOT}
 | ',' { COMMA }
 | ':' { COLON }
+| ';' { SIMI }
 | "&&" {LILAND}
 | "||" {LILOR}
 | "--" { read_single_line_comment lexbuf }
@@ -160,7 +163,7 @@ and read_string buf = parse
 | '?' {QUESTION}
 | '#' { SHARP }
 
-| ';' { SIMI }
+
 | "||" { PAR }
 | "require" {REQUIRE}
 | "ensure" {ENSURE}

@@ -109,7 +109,7 @@ type alias Uniforms =
   { perspective : Mat4
   }
 
-{-
+
 vertexShader : WebGL.Shader Vertex Uniforms { vcolor : Vec3 }
 vertexShader =
     [glsl|
@@ -120,7 +120,7 @@ vertexShader =
 
         void main () {
             gl_Position = perspective * vec4(position, 1.0);
-            vcolor = color;
+            vcolor = color
         }
     |]
 
@@ -132,7 +132,6 @@ fragmentShader =
         varying vec3 vcolor;
 
         void main () {
-            gl_FragColor = vec4(vcolor, 1.0);
+            gl_FragColor = vec4(vcolor, 1.0)
         }
     |]
--}
