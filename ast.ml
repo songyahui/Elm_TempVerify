@@ -112,6 +112,14 @@ type statement =
     | EffectModuleDeclaration of mn * ( ( mn * mn )list)  *exportSet
     *)
 
+(* Transition Rules *)
+(*-| *)
+
+type transition_rules = (string * (string list)) list 
+type elm_framework = Frameless 
+    | FourEle of (string * string * string * string * string)
+      (* init, update,  subscriptions, view, Msg type *)
+    
 type program = statement list 
 
 type prog_states = (pure * es ) list

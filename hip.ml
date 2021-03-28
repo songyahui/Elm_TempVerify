@@ -2,6 +2,8 @@
 open Pretty
 open Ast
 
+exception Foo of string
+
 
 let string_of_literal (l:literal) : string = 
   match l with 
@@ -97,6 +99,71 @@ let rec string_of_program (states : statement list) : string =
   | x::xs -> string_of_statement x ^ "\n\n" ^ string_of_program xs 
   ;;
 
+let rec string_of_transition_rules (tr: transition_rules): string = 
+  match tr with 
+  | [] -> ""
+  | (str, s_li) :: xs -> str ^ " -> " ^ (List.fold_left (fun acc a -> acc ^ " " ^ a) "" s_li) ^"\n" ^ string_of_transition_rules xs 
+
+  ;;
+
+let rec get_fun_type_from_prog (states : statement list)  (nm:string): _type = 
+  match states with 
+  | [] -> raise (Foo " this program has no main \n")
+  | (FunctionTypeDeclaration ( str, _type)):: xs -> if (String.compare str nm == 0) then _type else get_fun_type_from_prog xs  nm
+  | _ :: xs -> get_fun_type_from_prog xs nm
+  ;;
+
+let rec get_fun_from_prog (states : statement list)  (nm:string): expression = 
+  match states with 
+  | [] -> raise (Foo " this program has no main \n")
+  | (FunctionDeclaration ((PVariable str), expr)):: xs -> if (String.compare str nm == 0) then expr else get_fun_from_prog xs nm
+  | _ :: xs -> get_fun_from_prog xs nm
+  ;;
+
+
+
+let rec getfeildFromRecord map_li str: string = 
+  match map_li with 
+  | [] -> raise (Foo ("looking for a filed " ^ str ^ " which is not exist"))
+  | (x, y) :: xs -> if String.compare x str == 0 then string_of_expression y else getfeildFromRecord xs str
+  ;;
+
+let getMsg_type (states : statement list)  str :string =
+  let view_type = get_fun_type_from_prog states str in 
+  match view_type with 
+  | (TypeApplication (_, TypeConstructor (_, _type_list))) -> string_of_type (List.hd (_type_list))
+  | _ -> ""
+;;
+
+
+let string_of_elm_frame frame : string =
+  match frame with 
+  | Frameless -> "no frame \n"
+  | FourEle (s1, s2, s3, s4, s5)  ->
+  "init = " ^s1 ^
+  "\nupdate = " ^s2 ^
+  "\nsubscriptions = " ^s3 ^
+  "\nview = " ^ s4 ^
+  "\nMsg type = " ^ s5 ^"\n"
+  ;;
+
+let get_elm_frame (states : statement list) : elm_framework = 
+  let main_fun = get_fun_from_prog states "main" in 
+  match main_fun with 
+  | Application (Access ((Variable bro), ele) , Record expr) -> 
+    if (String.compare bro "Browser" == 0  && String.compare (List.hd ele) "element" == 0) then  
+      FourEle (getfeildFromRecord expr "init"
+              ,getfeildFromRecord expr "update"
+              ,getfeildFromRecord expr "subscriptions"
+              ,getfeildFromRecord expr "view" 
+              ,getMsg_type states (getfeildFromRecord expr "view"))
+    else Frameless
+
+  | _ -> Frameless
+  ;;
+
+
+
 
 let () =
   let inputfile = (Sys.getcwd () ^ "/" ^ Sys.argv.(1)) in
@@ -110,7 +177,7 @@ print_string (inputfile ^ "\n" ^ outputfile^"\n");*)
       
 
       print_string (string_of_program progs^"\n");
-      (*print_string ( (forward_verification progs) ^"\n");*)
+      print_string (string_of_elm_frame (get_elm_frame progs) ^"\n");
       
       flush stdout;                (* 现在写入默认设备 *)
       close_in ic                  (* 关闭输入通道 *)
