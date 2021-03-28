@@ -4,7 +4,6 @@ open Ast
 
 exception Foo of string
 
-
 let string_of_literal (l:literal) : string = 
   match l with 
   | Character c -> String.make 1 c 
@@ -16,7 +15,8 @@ let string_of_literal (l:literal) : string =
 let rec string_of_type (t:_type): string = 
   match t with 
   | TypeConstructor (mn_li, t_li) -> 
-    List.fold_left (fun acc a -> acc ^"." ^ a) ""  mn_li ^ 
+    List.fold_left (fun acc a -> acc ^"" ^ a) ""  mn_li ^ 
+    " "^
     List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t_li
   | TypeVariable v -> v
   | TypeRecord tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_type b ) "" tuple_li ^ "}"
@@ -46,7 +46,7 @@ let rec string_of_expression (expr:expression) : string =
   | Case (ex, p_ex_li) -> 
     "case " ^ string_of_expression ex ^ " of " ^ 
     "(" ^List.fold_left (fun acc (a, b) -> acc ^"\n " ^ string_of_pattern a ^" -> " ^ string_of_expression b) "" p_ex_li ^")"
-  | Lambda (p_li, ex) -> "(" ^List.fold_left (fun acc a -> acc ^" " ^ string_of_pattern a) "\\" p_li ^" -> e"^ string_of_expression ex ^")"
+  | Lambda (p_li, ex) -> "(" ^List.fold_left (fun acc a -> acc ^" " ^ string_of_pattern a) "\\" p_li ^" -> "^ string_of_expression ex ^")"
   | BinOp (e1, e2, e3) -> string_of_expression e2 ^ " "^ string_of_expression e1 ^ " " ^ string_of_expression e3
   | List ex_li -> "[" ^List.fold_left (fun acc a -> acc ^", " ^ string_of_expression a) "" ex_li ^"]"
   | RecordUpdate (str, tuple_li) -> "{" ^ str ^ " | " ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_expression b ) "" tuple_li ^ "}"
@@ -108,24 +108,37 @@ let rec string_of_transition_rules (tr: transition_rules): string =
 
 let rec get_fun_type_from_prog (states : statement list)  (nm:string): _type = 
   match states with 
-  | [] -> raise (Foo " this program has no main \n")
+  | [] -> raise (Foo (" this program has no type of "^ nm))
   | (FunctionTypeDeclaration ( str, _type)):: xs -> if (String.compare str nm == 0) then _type else get_fun_type_from_prog xs  nm
   | _ :: xs -> get_fun_type_from_prog xs nm
   ;;
 
-let rec get_fun_from_prog (states : statement list)  (nm:string): expression = 
+let rec get_fun_from_prog (states : statement list)  (nm:string): pattern * expression = 
   match states with 
-  | [] -> raise (Foo " this program has no main \n")
-  | (FunctionDeclaration ((PVariable str), expr)):: xs -> if (String.compare str nm == 0) then expr else get_fun_from_prog xs nm
+  | [] -> raise (Foo (" this program has no "^ nm))
+  | (FunctionDeclaration (pat, expr)):: xs -> 
+    (match pat with 
+    | PVariable str -> if (String.compare str nm == 0) 
+      then  (pat, expr) else get_fun_from_prog xs nm
+    | PApplication (PVariable str, _) -> if (String.compare str nm == 0) 
+      then  (pat, expr) else get_fun_from_prog xs nm
+    | _ -> raise (Foo ("get_fun_from_prog" ^ string_of_pattern pat))
+    )
+  
   | _ :: xs -> get_fun_from_prog xs nm
   ;;
 
-
-
-let rec getfeildFromRecord map_li str: string = 
+let rec getfeild_string_FromRecord map_li str: string = 
   match map_li with 
   | [] -> raise (Foo ("looking for a filed " ^ str ^ " which is not exist"))
-  | (x, y) :: xs -> if String.compare x str == 0 then string_of_expression y else getfeildFromRecord xs str
+  | (x, y) :: xs -> if String.compare x str == 0 then string_of_expression y else getfeild_string_FromRecord xs str
+  ;;
+
+
+let rec getfeildFromRecord map_li str: expression = 
+  match map_li with 
+  | [] -> raise (Foo ("looking for a filed " ^ str ^ " which is not exist"))
+  | (x, y) :: xs -> if String.compare x str == 0 then y else getfeildFromRecord xs str
   ;;
 
 let getMsg_type (states : statement list)  str :string =
@@ -136,27 +149,60 @@ let getMsg_type (states : statement list)  str :string =
 ;;
 
 
+let string_of_lambda (p_li, ex) : string = 
+  
+  "(" ^List.fold_left (fun acc a -> acc ^" " ^ string_of_pattern a) "\\" p_li ^" -> "^ string_of_expression ex ^")"
+  ;;
+
 let string_of_elm_frame frame : string =
   match frame with 
   | Frameless -> "no frame \n"
   | FourEle (s1, s2, s3, s4, s5)  ->
-  "init = " ^s1 ^
-  "\nupdate = " ^s2 ^
-  "\nsubscriptions = " ^s3 ^
-  "\nview = " ^ s4 ^
-  "\nMsg type = " ^ s5 ^"\n"
+  "init = " ^string_of_lambda s1 ^
+  "\nupdate = " ^string_of_lambda s2 ^
+  "\nsubscriptions = " ^string_of_lambda s3 ^
+  "\nview = " ^ string_of_lambda s4 ^
+  "\nMsg type = " ^  s5 ^"\n"
+  | Sandbox (s1, s2, s3, s4)  ->
+  "init = " ^string_of_lambda s1 ^
+  "\nupdate = " ^string_of_lambda s2 ^
+  "\nview = " ^string_of_lambda s3 ^
+  "\nMsg type = " ^ s4 ^"\n"
+  ;;
+
+let rec applicationToList o = 
+    match o with 
+    | PApplication (p1, p2) -> List.append (applicationToList p1) (applicationToList p2)
+    | _ -> [o]
+    ;;
+
+let funToLambda (states : statement list) expr:  lambda = 
+  match expr with 
+  | Variable str -> 
+
+    (let (p, expr) = get_fun_from_prog states str in 
+      (applicationToList p, expr)
+    )
+  | Lambda (lam1, lam2) -> (lam1, lam2)
+  | _ -> raise (Foo ("later funToLambdar:" ^ string_of_expression expr))
   ;;
 
 let get_elm_frame (states : statement list) : elm_framework = 
   let main_fun = get_fun_from_prog states "main" in 
-  match main_fun with 
+  let (_, main_body) = main_fun in 
+  match main_body with 
   | Application (Access ((Variable bro), ele) , Record expr) -> 
     if (String.compare bro "Browser" == 0  && String.compare (List.hd ele) "element" == 0) then  
-      FourEle (getfeildFromRecord expr "init"
-              ,getfeildFromRecord expr "update"
-              ,getfeildFromRecord expr "subscriptions"
-              ,getfeildFromRecord expr "view" 
-              ,getMsg_type states (getfeildFromRecord expr "view"))
+      FourEle (funToLambda states (getfeildFromRecord expr "init")
+              ,funToLambda states (getfeildFromRecord expr "update")
+              ,funToLambda states (getfeildFromRecord expr "subscriptions")
+              ,funToLambda states (getfeildFromRecord expr "view" )
+              ,getMsg_type states (getfeild_string_FromRecord expr "view"))
+    else if (String.compare bro "Browser" == 0  && String.compare (List.hd ele) "sandbox" == 0) then  
+      Sandbox (funToLambda states (getfeildFromRecord expr "init")
+            ,funToLambda states (getfeildFromRecord expr "update")
+            ,funToLambda states (getfeildFromRecord expr "view" )
+            ,getMsg_type states (getfeild_string_FromRecord expr "view"))
     else Frameless
 
   | _ -> Frameless
@@ -176,7 +222,7 @@ print_string (inputfile ^ "\n" ^ outputfile^"\n");*)
       let progs = Parser.program Lexer.token (Lexing.from_string line) in
       
 
-      print_string (string_of_program progs^"\n");
+      (*print_string (string_of_program progs^"\n");*)
       print_string (string_of_elm_frame (get_elm_frame progs) ^"\n");
       
       flush stdout;                (* 现在写入默认设备 *)
