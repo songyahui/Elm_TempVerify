@@ -156,7 +156,7 @@ vertexShader =
     varying vec3 vcolor;
     void main () {
         gl_Position = perspective * camera * rotation * vec4(position, 1.0);
-        vcolor = color
+        vcolor = color;
     }
   |]
 
@@ -167,7 +167,7 @@ fragmentShader =
     precision mediump float;
     varying vec3 vcolor;
     void main () {
-        gl_FragColor = 0.8 * vec4(vcolor, 1.0)
+        gl_FragColor = 0.8 * vec4(vcolor, 1.0);
     }
   |]
 

@@ -65,7 +65,7 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> Html msg
+view : Model -> Html Msg
 view t =
   WebGL.toHtml
     [ width 400, height 400, style "display" "block"
@@ -120,7 +120,7 @@ vertexShader =
 
         void main () {
             gl_Position = perspective * vec4(position, 1.0);
-            vcolor = color
+            vcolor = color;
         }
     |]
 
@@ -132,6 +132,6 @@ fragmentShader =
         varying vec3 vcolor;
 
         void main () {
-            gl_FragColor = vec4(vcolor, 1.0)
+            gl_FragColor = vec4(vcolor, 1.0);
         }
     |]

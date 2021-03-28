@@ -199,7 +199,7 @@ let funToLambda (states : statement list) expr:  lambda =
 
 let rec getMsgtypeDef states str : (_type list) = 
   match states with 
-  | [] ->  raise (Foo "getMsgtypeDef error")
+  | [] ->  raise (Foo ("getMsgtypeDef error: " ^ str))
   | (TypeDeclaration ((TypeConstructor (nm, _)), typeDef)) :: xs ->
     
     if String.compare (List.hd nm) str == 0 then typeDef 
@@ -249,6 +249,8 @@ let rec getInputFromView view type_list : string list =
     List.append (getInputFromView ex1 type_list ) (getInputFromView ex2 type_list)
   | Case (_, p_expre) -> List.fold_left (fun acc (_, a) -> List.append acc (getInputFromView a type_list)) [] p_expre
   | List ex_li -> List.fold_left (fun acc a -> List.append acc (getInputFromView a type_list)) [] ex_li
+  | Tuple (ex_li) -> List.fold_left (fun acc a -> List.append acc (getInputFromView a type_list)) [] ex_li
+  | Access (ex,_) -> getInputFromView ex type_list
   | _ -> []
   ;;
 

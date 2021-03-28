@@ -271,8 +271,11 @@ glsl_or_list:
 
 glsl_expression:
 | newlines  expression newlines {()}
-| newlines VOID LVAR expr_term LBRACK  newlines  separated_list (SIMI, glsl_expression) newlines RBRACK newlines {()}
+| newlines VOID LVAR expr_term LBRACK  newlines  glsl_fun newlines RBRACK newlines {()}
 
+glsl_fun:
+| {()}
+| newlines glsl_expression SIMI  newlines glsl_fun{()}
 
 
 
