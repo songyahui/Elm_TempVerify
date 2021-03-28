@@ -100,11 +100,14 @@ let rec string_of_program (states : statement list) : string =
   ;;
 
 let string_of_transition_rules ((inp, tr_ar): transition_rules): string = 
-  List.fold_left (fun acc a -> acc ^ " " ^ a) ">>Inputs are: \n" inp ^ "\n>>Tran Rules are:\n" ^
+  List.fold_left (fun acc a -> acc ^ "\n" ^ a) ">>Inputs are: " inp ^ "\n\n>>Tran Rules are:\n" ^
   (let rec aux tr= 
     match tr with 
       | [] -> ""
-  | (str, s_li) :: xs -> str ^ " -> " ^ (List.fold_left (fun acc a -> acc ^ " " ^ a) "" s_li) ^"\n" ^ aux xs 
+  | (str, s_li) :: xs -> str ^ " -> " ^ 
+    (if (List.length s_li == 0) then "none"
+    else 
+    (List.fold_left (fun acc a -> acc ^ " " ^ a) "" s_li)) ^"\n" ^ aux xs 
   in aux tr_ar
   )
   ;;
@@ -225,20 +228,31 @@ let get_elm_frame (states : statement list) : elm_framework =
   | _ -> Frameless
   ;;
 
+let rec is_one_of_Msg type_list str: bool =
+  match type_list with 
+  | [] -> false
+  | x :: xs -> 
+    let rec aux t =
+      (match t with 
+      | TypeVariable nm -> String.compare nm str == 0 
+      | TypeApplication (t1, t2) -> aux t1 || aux t2 
+      | TypeConstructor (mn_li, _) -> String.compare (List.hd mn_li) str == 0
+      | _ -> false 
+      )
+    in if aux x then true else is_one_of_Msg xs str
+    ;;
+
 let rec getInputFromView view type_list : string list =
   match view with 
-  | Application (Variable listen, expr) -> 
-    if String.compare listen "onClick" == 0 then [string_of_expression expr ]
-    else []
+  | Variable nm -> if is_one_of_Msg type_list nm then [nm] else []
+  | Application (ex1, ex2) -> 
+    List.append (getInputFromView ex1 type_list ) (getInputFromView ex2 type_list)
   | Case (_, p_expre) -> List.fold_left (fun acc (_, a) -> List.append acc (getInputFromView a type_list)) [] p_expre
+  | List ex_li -> List.fold_left (fun acc a -> List.append acc (getInputFromView a type_list)) [] ex_li
   | _ -> []
   ;;
 
-  (*
-let getInputFromSub sub type_list : string list =
-  []
-  ;;
-  *)
+
 
 let get_transition_rules update type_list: (string * (string list)) list =
   match update with 
@@ -256,11 +270,11 @@ let get_transition_rules (states : statement list) :transition_rules=
     let inp_view = getInputFromView view msg in 
     let tr = get_transition_rules update msg in 
     (inp_view, tr)
-  | FourEle (_, (_, update), (_, _), (_, view), msg) ->
+  | FourEle (_, (_, update), (_, subscriptions), (_, view), msg) ->
     let inp_view = getInputFromView view msg in 
-    (*let inp_sub = getInputFromSub subscriptions msg in *)
+    let inp_sub = getInputFromView subscriptions msg in 
     let tr = get_transition_rules update msg in 
-    ((*List.append inp_sub*) inp_view , tr)  
+    (List.append inp_sub inp_view , tr)  
 
   ;;
 
@@ -276,7 +290,7 @@ print_string (inputfile ^ "\n" ^ outputfile^"\n");*)
       let progs = Parser.program Lexer.token (Lexing.from_string line) in
       
 
-      print_string (string_of_program progs^"\n");
+      (*print_string (string_of_program progs^"\n");*)
       print_string (string_of_transition_rules (get_transition_rules progs) ^"\n");
       
       flush stdout;                (* 现在写入默认设备 *)
