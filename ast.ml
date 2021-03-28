@@ -115,12 +115,11 @@ type statement =
 (* Transition Rules *)
 (*-| *)
 type lambda = (pattern list) * expression
-
-type transition_rules = (string * (string list)) list 
+type transition_rules = (string list) * (string * (string list)) list 
 type elm_framework = Frameless 
-    | FourEle of (lambda * lambda * lambda * lambda * string)
+    | FourEle of (lambda * lambda * lambda * lambda * (_type list))
     (* init, update,  subscriptions, view, Msg type *)
-    | Sandbox of (lambda * lambda * lambda * string )
+    | Sandbox of (lambda * lambda * lambda * (_type list) )
     (* init, update, view, Msg type *)
 
     

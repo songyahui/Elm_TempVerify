@@ -16,7 +16,7 @@ let rec string_of_type (t:_type): string =
   match t with 
   | TypeConstructor (mn_li, t_li) -> 
     List.fold_left (fun acc a -> acc ^"" ^ a) ""  mn_li ^ 
-    " "^
+    ""^
     List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t_li
   | TypeVariable v -> v
   | TypeRecord tuple_li -> "{" ^ List.fold_left (fun acc (a, b) -> acc ^"," ^ a^"="^ string_of_type b ) "" tuple_li ^ "}"
@@ -99,11 +99,14 @@ let rec string_of_program (states : statement list) : string =
   | x::xs -> string_of_statement x ^ "\n\n" ^ string_of_program xs 
   ;;
 
-let rec string_of_transition_rules (tr: transition_rules): string = 
-  match tr with 
-  | [] -> ""
-  | (str, s_li) :: xs -> str ^ " -> " ^ (List.fold_left (fun acc a -> acc ^ " " ^ a) "" s_li) ^"\n" ^ string_of_transition_rules xs 
-
+let string_of_transition_rules ((inp, tr_ar): transition_rules): string = 
+  List.fold_left (fun acc a -> acc ^ " " ^ a) ">>Inputs are: \n" inp ^ "\n>>Tran Rules are:\n" ^
+  (let rec aux tr= 
+    match tr with 
+      | [] -> ""
+  | (str, s_li) :: xs -> str ^ " -> " ^ (List.fold_left (fun acc a -> acc ^ " " ^ a) "" s_li) ^"\n" ^ aux xs 
+  in aux tr_ar
+  )
   ;;
 
 let rec get_fun_type_from_prog (states : statement list)  (nm:string): _type = 
@@ -154,6 +157,10 @@ let string_of_lambda (p_li, ex) : string =
   "(" ^List.fold_left (fun acc a -> acc ^" " ^ string_of_pattern a) "\\" p_li ^" -> "^ string_of_expression ex ^")"
   ;;
 
+let string_of_typeDef t2_li : string = 
+   List.fold_left (fun acc a -> acc ^" " ^ string_of_type a) "" t2_li
+   ;;
+
 let string_of_elm_frame frame : string =
   match frame with 
   | Frameless -> "no frame \n"
@@ -162,12 +169,12 @@ let string_of_elm_frame frame : string =
   "\nupdate = " ^string_of_lambda s2 ^
   "\nsubscriptions = " ^string_of_lambda s3 ^
   "\nview = " ^ string_of_lambda s4 ^
-  "\nMsg type = " ^  s5 ^"\n"
+  "\nMsg type = " ^ string_of_typeDef s5 ^"\n"
   | Sandbox (s1, s2, s3, s4)  ->
   "init = " ^string_of_lambda s1 ^
   "\nupdate = " ^string_of_lambda s2 ^
   "\nview = " ^string_of_lambda s3 ^
-  "\nMsg type = " ^ s4 ^"\n"
+  "\nMsg type = " ^string_of_typeDef  s4 ^"\n"
   ;;
 
 let rec applicationToList o = 
@@ -187,6 +194,16 @@ let funToLambda (states : statement list) expr:  lambda =
   | _ -> raise (Foo ("later funToLambdar:" ^ string_of_expression expr))
   ;;
 
+let rec getMsgtypeDef states str : (_type list) = 
+  match states with 
+  | [] ->  raise (Foo "getMsgtypeDef error")
+  | (TypeDeclaration ((TypeConstructor (nm, _)), typeDef)) :: xs ->
+    
+    if String.compare (List.hd nm) str == 0 then typeDef 
+    else getMsgtypeDef xs str 
+  | _ :: xs -> getMsgtypeDef xs str 
+  ;;
+
 let get_elm_frame (states : statement list) : elm_framework = 
   let main_fun = get_fun_from_prog states "main" in 
   let (_, main_body) = main_fun in 
@@ -197,18 +214,55 @@ let get_elm_frame (states : statement list) : elm_framework =
               ,funToLambda states (getfeildFromRecord expr "update")
               ,funToLambda states (getfeildFromRecord expr "subscriptions")
               ,funToLambda states (getfeildFromRecord expr "view" )
-              ,getMsg_type states (getfeild_string_FromRecord expr "view"))
+              ,getMsgtypeDef states (getMsg_type states (getfeild_string_FromRecord expr "view")))
     else if (String.compare bro "Browser" == 0  && String.compare (List.hd ele) "sandbox" == 0) then  
       Sandbox (funToLambda states (getfeildFromRecord expr "init")
             ,funToLambda states (getfeildFromRecord expr "update")
             ,funToLambda states (getfeildFromRecord expr "view" )
-            ,getMsg_type states (getfeild_string_FromRecord expr "view"))
+            ,getMsgtypeDef states (getMsg_type states (getfeild_string_FromRecord expr "view")))
     else Frameless
 
   | _ -> Frameless
   ;;
 
+let rec getInputFromView view type_list : string list =
+  match view with 
+  | Application (Variable listen, expr) -> 
+    if String.compare listen "onClick" == 0 then [string_of_expression expr ]
+    else []
+  | Case (_, p_expre) -> List.fold_left (fun acc (_, a) -> List.append acc (getInputFromView a type_list)) [] p_expre
+  | _ -> []
+  ;;
 
+  (*
+let getInputFromSub sub type_list : string list =
+  []
+  ;;
+  *)
+
+let get_transition_rules update type_list: (string * (string list)) list =
+  match update with 
+  | Case (_, p_expre) -> List.fold_left (fun acc (start, a) -> List.append acc [(string_of_pattern start, getInputFromView a type_list)]) [] p_expre
+  | _ -> []
+
+  ;;
+
+
+let get_transition_rules (states : statement list) :transition_rules=
+  let frame = get_elm_frame states in 
+  match frame with 
+  | Frameless -> ([], [])
+  | Sandbox (_, (_, update), (_, view), msg) -> 
+    let inp_view = getInputFromView view msg in 
+    let tr = get_transition_rules update msg in 
+    (inp_view, tr)
+  | FourEle (_, (_, update), (_, _), (_, view), msg) ->
+    let inp_view = getInputFromView view msg in 
+    (*let inp_sub = getInputFromSub subscriptions msg in *)
+    let tr = get_transition_rules update msg in 
+    ((*List.append inp_sub*) inp_view , tr)  
+
+  ;;
 
 
 let () =
@@ -222,8 +276,8 @@ print_string (inputfile ^ "\n" ^ outputfile^"\n");*)
       let progs = Parser.program Lexer.token (Lexing.from_string line) in
       
 
-      (*print_string (string_of_program progs^"\n");*)
-      print_string (string_of_elm_frame (get_elm_frame progs) ^"\n");
+      print_string (string_of_program progs^"\n");
+      print_string (string_of_transition_rules (get_transition_rules progs) ^"\n");
       
       flush stdout;                (* 现在写入默认设备 *)
       close_in ic                  (* 关闭输入通道 *)
